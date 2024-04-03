@@ -1,0 +1,101 @@
+{
+  "format": 1,
+  "restore": {
+    "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {}
+  },
+  "projects": {
+    "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+        "projectName": "DNS-Simulation",
+        "projectPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+        "packagesPath": "C:\\Users\\luutr\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
+        "projectStyle": "PackageReference",
+        "configFilePaths": [
+          "C:\\Users\\luutr\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "net6.0-windows"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "net6.0-windows7.0": {
+            "targetAlias": "net6.0-windows",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        },
+        "restoreAuditProperties": {
+          "enableAudit": "true",
+          "auditLevel": "low",
+          "auditMode": "direct"
+        }
+      },
+      "frameworks": {
+        "net6.0-windows7.0": {
+          "targetAlias": "net6.0-windows",
+          "dependencies": {
+            "Ae.Dns.AppMetrics": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Ae.Dns.Client": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Ae.Dns.Protocol": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Ae.Dns.Server": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Ae.Dns.Server.Http": {
+              "target": "Package",
+              "version": "[3.0.0, )"
+            },
+            "Microsoft.Extensions.Http.Polly": {
+              "target": "Package",
+              "version": "[8.0.3, )"
+            },
+            "Polly": {
+              "target": "Package",
+              "version": "[8.3.1, )"
+            }
+          },
+          "imports": [
+            "net461",
+            "net462",
+            "net47",
+            "net471",
+            "net472",
+            "net48",
+            "net481"
+          ],
+          "assetTargetFallback": true,
+          "warn": true,
+          "frameworkReferences": {
+            "Microsoft.NETCore.App": {
+              "privateAssets": "all"
+            },
+            "Microsoft.WindowsDesktop.App.WindowsForms": {
+              "privateAssets": "none"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}
