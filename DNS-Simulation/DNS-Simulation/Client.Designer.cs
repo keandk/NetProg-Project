@@ -1,6 +1,6 @@
 ﻿namespace DNS_Simulation
 {
-    partial class Form1
+    partial class Client
     {
         /// <summary>
         ///  Required designer variable.
@@ -33,7 +33,7 @@
             resDisplay = new GroupBox();
             resContainer = new ListBox();
             metricsContainer = new GroupBox();
-            msgSizeLabel = new Label();
+            msgSize = new Label();
             atTime = new Label();
             serverLabel = new Label();
             duration = new Label();
@@ -42,6 +42,8 @@
             sendButton = new Button();
             activityLog = new GroupBox();
             activityContainer = new ListBox();
+            httpRadioButton = new RadioButton();
+            udpRadioButton = new RadioButton();
             resDisplay.SuspendLayout();
             metricsContainer.SuspendLayout();
             activityLog.SuspendLayout();
@@ -59,7 +61,7 @@
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(363, 19);
+            label2.Location = new Point(21, 61);
             label2.Name = "label2";
             label2.Size = new Size(89, 20);
             label2.TabIndex = 1;
@@ -68,7 +70,7 @@
             // resDisplay
             // 
             resDisplay.Controls.Add(resContainer);
-            resDisplay.Location = new Point(21, 61);
+            resDisplay.Location = new Point(21, 104);
             resDisplay.Name = "resDisplay";
             resDisplay.Size = new Size(347, 279);
             resDisplay.TabIndex = 2;
@@ -87,25 +89,25 @@
             // 
             // metricsContainer
             // 
-            metricsContainer.Controls.Add(msgSizeLabel);
+            metricsContainer.Controls.Add(msgSize);
             metricsContainer.Controls.Add(atTime);
             metricsContainer.Controls.Add(serverLabel);
             metricsContainer.Controls.Add(duration);
-            metricsContainer.Location = new Point(21, 356);
+            metricsContainer.Location = new Point(21, 399);
             metricsContainer.Name = "metricsContainer";
             metricsContainer.Size = new Size(716, 159);
             metricsContainer.TabIndex = 3;
             metricsContainer.TabStop = false;
             metricsContainer.Text = "Metrics";
             // 
-            // msgSizeLabel
+            // msgSize
             // 
-            msgSizeLabel.AutoSize = true;
-            msgSizeLabel.Location = new Point(12, 125);
-            msgSizeLabel.Name = "msgSizeLabel";
-            msgSizeLabel.Size = new Size(103, 20);
-            msgSizeLabel.TabIndex = 3;
-            msgSizeLabel.Text = "Message size: ";
+            msgSize.AutoSize = true;
+            msgSize.Location = new Point(12, 125);
+            msgSize.Name = "msgSize";
+            msgSize.Size = new Size(103, 20);
+            msgSize.TabIndex = 3;
+            msgSize.Text = "Message size: ";
             // 
             // atTime
             // 
@@ -138,23 +140,23 @@
             // 
             domainInput.Location = new Point(89, 16);
             domainInput.Name = "domainInput";
-            domainInput.Size = new Size(268, 27);
+            domainInput.Size = new Size(279, 27);
             domainInput.TabIndex = 4;
             // 
             // rcTypeCombo
             // 
             rcTypeCombo.FormattingEnabled = true;
             rcTypeCombo.Items.AddRange(new object[] { "A", "AAAA", "CNAME", "MX", "NS", "PTR", "SOA" });
-            rcTypeCombo.Location = new Point(458, 16);
+            rcTypeCombo.Location = new Point(116, 58);
             rcTypeCombo.Name = "rcTypeCombo";
-            rcTypeCombo.Size = new Size(151, 28);
+            rcTypeCombo.Size = new Size(127, 28);
             rcTypeCombo.TabIndex = 5;
             // 
             // sendButton
             // 
-            sendButton.Location = new Point(643, 16);
+            sendButton.Location = new Point(445, 27);
             sendButton.Name = "sendButton";
-            sendButton.Size = new Size(94, 29);
+            sendButton.Size = new Size(103, 50);
             sendButton.TabIndex = 6;
             sendButton.Text = "SEND";
             sendButton.UseVisualStyleBackColor = true;
@@ -163,7 +165,7 @@
             // activityLog
             // 
             activityLog.Controls.Add(activityContainer);
-            activityLog.Location = new Point(390, 61);
+            activityLog.Location = new Point(390, 104);
             activityLog.Name = "activityLog";
             activityLog.Size = new Size(347, 279);
             activityLog.TabIndex = 3;
@@ -180,11 +182,35 @@
             activityContainer.Size = new Size(330, 244);
             activityContainer.TabIndex = 0;
             // 
+            // httpRadioButton
+            // 
+            httpRadioButton.AutoSize = true;
+            httpRadioButton.Location = new Point(265, 59);
+            httpRadioButton.Name = "httpRadioButton";
+            httpRadioButton.Size = new Size(65, 24);
+            httpRadioButton.TabIndex = 7;
+            httpRadioButton.TabStop = true;
+            httpRadioButton.Text = "HTTP";
+            httpRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // udpRadioButton
+            // 
+            udpRadioButton.AutoSize = true;
+            udpRadioButton.Location = new Point(336, 59);
+            udpRadioButton.Name = "udpRadioButton";
+            udpRadioButton.Size = new Size(59, 24);
+            udpRadioButton.TabIndex = 8;
+            udpRadioButton.TabStop = true;
+            udpRadioButton.Text = "UDP";
+            udpRadioButton.UseVisualStyleBackColor = true;
+            // 
             // Form1
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 547);
+            ClientSize = new Size(800, 585);
+            Controls.Add(udpRadioButton);
+            Controls.Add(httpRadioButton);
             Controls.Add(activityLog);
             Controls.Add(sendButton);
             Controls.Add(rcTypeCombo);
@@ -213,11 +239,13 @@
         private ComboBox rcTypeCombo;
         private Button sendButton;
         private ListBox resContainer;
-        private Label msgSizeLabel;
+        private Label msgSize;
         private Label atTime;
         private Label serverLabel;
         private Label duration;
         private GroupBox activityLog;
         private ListBox activityContainer;
+        private RadioButton httpRadioButton;
+        private RadioButton udpRadioButton;
     }
 }
