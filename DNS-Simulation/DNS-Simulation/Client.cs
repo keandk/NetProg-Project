@@ -66,23 +66,91 @@ namespace DNS_Simulation
             }
         }
 
+        private Uri EnteredUriHttp()
+        {
+            if (destinationCombo.SelectedItem.ToString() == "Local 1")
+            {
+                var dnsUri = new Uri("http://nhom3.com/");
+                return dnsUri;
+            }
+            else if (destinationCombo.SelectedItem.ToString() == "Local 2")
+            {
+                var dnsUri = new Uri("http://group3.com/");
+                return dnsUri;
+
+            }
+            else if (destinationCombo.SelectedItem.ToString() == "Cloudflare")
+            {
+                var dnsUri = new Uri("https://cloudflare-dns.com/");
+                return dnsUri;
+
+            }
+            else if (destinationCombo.SelectedItem.ToString() == "Google")
+            {
+                var dnsUri = new Uri("https://dns.google/");
+                return dnsUri;
+
+            }
+            else
+            {
+                var dnsUri = new Uri("http://nhom3.com/");
+                return dnsUri;
+            }
+        }
+
+        private string EnteredUriUdp()
+        {
+            string ip = "";
+            if (destinationCombo.SelectedItem.ToString() == "Local 1")
+            {
+                ip = "192.168.91.5";
+                return ip;
+            }
+            else if (destinationCombo.SelectedItem.ToString() == "Local 2")
+            {
+                ip = "192.168.91.10";
+                return ip;
+
+            }
+            else if (destinationCombo.SelectedItem.ToString() == "Cloudflare")
+            {
+                ip = "1.1.1.1";
+                return ip;
+
+            }
+            else if (destinationCombo.SelectedItem.ToString() == "Google")
+            {
+                ip = "8.8.8.8";
+                return ip;
+            }
+            else
+            {
+                return ip;
+            }
+        }
+
         private async Task AdvancedHttpClient()
         {
             try
             {// AdvancedHttpClient
-            IServiceCollection services = new ServiceCollection();
-            serverLabel.Text = "Server: ";
+                IServiceCollection services = new ServiceCollection();
+                serverLabel.Text = "Server: ";
 
-            var dnsUri = new Uri("https://cloudflare-dns.com/");
-            services.AddHttpClient<IDnsClient, DnsHttpClient>(x => x.BaseAddress = dnsUri)
-                    .AddTransientHttpErrorPolicy(x =>
-                                           x.WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt))));
+                Uri dnsUri = EnteredUriHttp();
+                if(dnsUri == null)
+                {
+                    throw new Exception("You have not chose the destination!");
+                }
 
-            using ServiceProvider provider = services.BuildServiceProvider();
+                services.AddHttpClient<IDnsClient, DnsHttpClient>(x => x.BaseAddress = dnsUri)
+                        .AddTransientHttpErrorPolicy(x =>
+                                               x.WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt))));
 
-            using IDnsClient dnsClient = provider.GetRequiredService<IDnsClient>();
+                using ServiceProvider provider = services.BuildServiceProvider();
 
-            await StartQuery(dnsClient, true);
+                using IDnsClient dnsClient = provider.GetRequiredService<IDnsClient>();
+
+                await StartQuery(dnsClient, true);
 
                 serverLabel.Text += dnsUri;
             }
@@ -95,11 +163,16 @@ namespace DNS_Simulation
         private async Task BasicUdpClient()
         {
             try
-            {string ip = "1.1.1.1";
-            serverLabel.Text = "Server: ";
-            using IDnsClient dnsClient = new DnsUdpClient(IPAddress.Parse(ip));
+            {
+                string ip = EnteredUriUdp();
+                if (ip == "")
+                {
+                    throw new Exception("You have not chose the destination!");
+                }
+                serverLabel.Text = "Server: ";
+                using IDnsClient dnsClient = new DnsUdpClient(IPAddress.Parse(ip));
 
-            await StartQuery(dnsClient, false);
+                await StartQuery(dnsClient, false);
 
                 serverLabel.Text += ip;
             }
@@ -132,6 +205,12 @@ namespace DNS_Simulation
             {
                 activityContainer.Items.Add("Error: " + ex.Message);
             }
+        }
+
+        private void createNewClientButton_Click(object sender, EventArgs e)
+        {
+            Client client = new Client();
+            client.Show();
         }
     }
 }
