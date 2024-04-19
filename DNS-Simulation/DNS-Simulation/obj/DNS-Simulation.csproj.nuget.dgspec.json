@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {}
+    "E:\\ThnBih_HK4\\LTMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {}
   },
   "projects": {
-    "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {
+    "E:\\ThnBih_HK4\\LTMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+        "projectUniqueName": "E:\\ThnBih_HK4\\LTMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
         "projectName": "DNS-Simulation",
-        "projectPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
-        "packagesPath": "C:\\Users\\luutr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
+        "projectPath": "E:\\ThnBih_HK4\\LTMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+        "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
+        "outputPath": "E:\\ThnBih_HK4\\LTMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\luutr\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -34,11 +34,6 @@
           "warnAsError": [
             "NU1605"
           ]
-        },
-        "restoreAuditProperties": {
-          "enableAudit": "true",
-          "auditLevel": "low",
-          "auditMode": "direct"
         }
       },
       "frameworks": {
@@ -72,6 +67,10 @@
             "Polly": {
               "target": "Package",
               "version": "[8.3.1, )"
+            },
+            "System.Data.SQLite": {
+              "target": "Package",
+              "version": "[1.0.118, )"
             }
           },
           "imports": [
@@ -93,7 +92,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.200\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
         }
       }
     }
