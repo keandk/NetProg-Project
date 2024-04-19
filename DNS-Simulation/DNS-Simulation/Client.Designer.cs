@@ -46,6 +46,7 @@
             createNewClientButton = new Button();
             label3 = new Label();
             destinationCombo = new ComboBox();
+            clearButton = new Button();
             resDisplay.SuspendLayout();
             metricsContainer.SuspendLayout();
             activityLog.SuspendLayout();
@@ -224,11 +225,22 @@
             destinationCombo.Size = new Size(127, 28);
             destinationCombo.TabIndex = 11;
             // 
+            // clearButton
+            // 
+            clearButton.Location = new Point(831, 27);
+            clearButton.Name = "clearButton";
+            clearButton.Size = new Size(160, 50);
+            clearButton.TabIndex = 12;
+            clearButton.Text = "CLEAR";
+            clearButton.UseVisualStyleBackColor = true;
+            clearButton.Click += clearButton_Click;
+            // 
             // Client
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1031, 585);
+            Controls.Add(clearButton);
             Controls.Add(destinationCombo);
             Controls.Add(label3);
             Controls.Add(createNewClientButton);
@@ -272,5 +284,6 @@
         private Button createNewClientButton;
         private Label label3;
         private ComboBox destinationCombo;
+        private Button clearButton;
     }
 }

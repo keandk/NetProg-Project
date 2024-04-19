@@ -6,14 +6,17 @@ using Microsoft.Extensions.DependencyInjection;
 using Polly;
 using System.Diagnostics;
 using System.Net;
+using System.Runtime.Caching;
 
 namespace DNS_Simulation
 {
     public partial class Client : Form
     {
+        private MemoryCache memoryCache;
         public Client()
         {
             InitializeComponent();
+            memoryCache = new MemoryCache("dns");
         }
 
         private async Task StartQuery(IDnsClient dnsClient, bool serverType)
@@ -43,6 +46,7 @@ namespace DNS_Simulation
 
                 DnsQueryType queryType = (DnsQueryType)Enum.Parse(typeof(DnsQueryType), selectedType);
                 DnsMessage answer = await dnsClient.Query(DnsQueryFactory.CreateQuery(domainInput.Text, queryType));
+                //MessageBox.Show( answer.Header.ToString());
 
                 stopwatch.Stop();
 
@@ -137,7 +141,7 @@ namespace DNS_Simulation
                 serverLabel.Text = "Server: ";
 
                 Uri dnsUri = EnteredUriHttp();
-                if(dnsUri == null)
+                if (dnsUri == null)
                 {
                     throw new Exception("You have not chose the destination!");
                 }
@@ -149,8 +153,10 @@ namespace DNS_Simulation
                 using ServiceProvider provider = services.BuildServiceProvider();
 
                 using IDnsClient dnsClient = provider.GetRequiredService<IDnsClient>();
+                //using var memoryCache = new MemoryCache("dns");
+                using IDnsClient cacheClient = new DnsCachingClient(dnsClient, memoryCache);
 
-                await StartQuery(dnsClient, true);
+                await StartQuery(cacheClient, true);
 
                 serverLabel.Text += dnsUri;
             }
@@ -171,8 +177,10 @@ namespace DNS_Simulation
                 }
                 serverLabel.Text = "Server: ";
                 using IDnsClient dnsClient = new DnsUdpClient(IPAddress.Parse(ip));
+                //using var memoryCache = new MemoryCache("dns");
+                using IDnsClient cacheClient = new DnsCachingClient(dnsClient, memoryCache);
 
-                await StartQuery(dnsClient, false);
+                await StartQuery(cacheClient, false);
 
                 serverLabel.Text += ip;
             }
@@ -211,6 +219,12 @@ namespace DNS_Simulation
         {
             Client client = new Client();
             client.Show();
+        }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            resContainer.Items.Clear();
+            activityContainer.Items.Clear();
         }
     }
 }
