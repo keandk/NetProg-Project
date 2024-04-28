@@ -28,12 +28,47 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Server";
+            serverLog = new ListBox();
+            listenButton = new Button();
+            SuspendLayout();
+            // 
+            // serverLog
+            // 
+            serverLog.FormattingEnabled = true;
+            serverLog.HorizontalScrollbar = true;
+            serverLog.ItemHeight = 20;
+            serverLog.Location = new Point(12, 12);
+            serverLog.Name = "serverLog";
+            serverLog.SelectionMode = SelectionMode.MultiSimple;
+            serverLog.Size = new Size(776, 344);
+            serverLog.TabIndex = 0;
+            // 
+            // listenButton
+            // 
+            listenButton.BackColor = SystemColors.ActiveCaption;
+            listenButton.Location = new Point(353, 386);
+            listenButton.Name = "listenButton";
+            listenButton.Size = new Size(94, 29);
+            listenButton.TabIndex = 1;
+            listenButton.Text = "Listen";
+            listenButton.UseVisualStyleBackColor = false;
+            listenButton.Click += listenButton_Click;
+            // 
+            // Server
+            // 
+            AutoScaleDimensions = new SizeF(8F, 20F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(listenButton);
+            Controls.Add(serverLog);
+            Name = "Server";
+            Text = "Server";
+            ResumeLayout(false);
         }
 
         #endregion
+
+        private ListBox serverLog;
+        private Button listenButton;
     }
 }

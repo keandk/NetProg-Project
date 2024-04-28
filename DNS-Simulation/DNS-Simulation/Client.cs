@@ -1,230 +1,66 @@
-using Ae.Dns.Client;
-using Ae.Dns.Metrics.InfluxDb;
-using Ae.Dns.Protocol;
-using Ae.Dns.Protocol.Enums;
-using Microsoft.Extensions.DependencyInjection;
-using Polly;
-using System.Diagnostics;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
 using System.Net;
-using System.Runtime.Caching;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using DNS.Client;
+using DNS.Protocol;
 
 namespace DNS_Simulation
 {
     public partial class Client : Form
     {
-        private MemoryCache memoryCache;
         public Client()
         {
             InitializeComponent();
-            memoryCache = new MemoryCache("dns");
-        }
-
-        private async Task StartQuery(IDnsClient dnsClient, bool serverType)
-        {
-            try
-            {
-
-                // 1 if http, 0 if udp
-                string selectedType = rcTypeCombo.SelectedItem.ToString();
-                atTime.Text = "When: ";
-                duration.Text = "Query time: ";
-
-                Stopwatch stopwatch = Stopwatch.StartNew();
-
-                if (serverType)
-                {
-                    activityContainer.Items.Add("Using AdvancedHttpClient");
-                }
-                else
-                {
-                    activityContainer.Items.Add("Using BasicUdpClient");
-                }
-
-                activityContainer.Items.Add($"Start Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}");
-                atTime.Text += DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss.fff");
-                activityContainer.Items.Add("Querying " + domainInput.Text + " for " + selectedType + " records");
-
-                DnsQueryType queryType = (DnsQueryType)Enum.Parse(typeof(DnsQueryType), selectedType);
-                DnsMessage answer = await dnsClient.Query(DnsQueryFactory.CreateQuery(domainInput.Text, queryType));
-                //MessageBox.Show( answer.Header.ToString());
-
-                stopwatch.Stop();
-
-                activityContainer.Items.Add($"End Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss.fff}");
-                activityContainer.Items.Add($"Elapsed Time: {stopwatch.Elapsed.TotalMilliseconds} milliseconds");
-                activityContainer.Items.Add($"Response: {answer}");
-                activityContainer.Items.Add("---------------------------------------------------");
-
-                foreach (var line in answer.ToString().Split(Environment.NewLine))
-                {
-                    resContainer.Items.Add(line);
-                }
-
-                resContainer.Items.Add("---------------------------------------------------");
-
-                duration.Text += stopwatch.Elapsed.TotalMilliseconds + " milliseconds";
-            }
-            catch (Exception ex)
-            {
-                activityContainer.Items.Add("Error: " + ex.Message);
-            }
-        }
-
-        private Uri EnteredUriHttp()
-        {
-            if (destinationCombo.SelectedItem.ToString() == "Local 1")
-            {
-                var dnsUri = new Uri("http://nhom3.com/");
-                return dnsUri;
-            }
-            else if (destinationCombo.SelectedItem.ToString() == "Local 2")
-            {
-                var dnsUri = new Uri("http://group3.com/");
-                return dnsUri;
-
-            }
-            else if (destinationCombo.SelectedItem.ToString() == "Cloudflare")
-            {
-                var dnsUri = new Uri("https://cloudflare-dns.com/");
-                return dnsUri;
-
-            }
-            else if (destinationCombo.SelectedItem.ToString() == "Google")
-            {
-                var dnsUri = new Uri("https://dns.google/");
-                return dnsUri;
-
-            }
-            else
-            {
-                var dnsUri = new Uri("http://nhom3.com/");
-                return dnsUri;
-            }
-        }
-
-        private string EnteredUriUdp()
-        {
-            string ip = "";
-            if (destinationCombo.SelectedItem.ToString() == "Local 1")
-            {
-                ip = "192.168.91.5";
-                return ip;
-            }
-            else if (destinationCombo.SelectedItem.ToString() == "Local 2")
-            {
-                ip = "192.168.91.10";
-                return ip;
-
-            }
-            else if (destinationCombo.SelectedItem.ToString() == "Cloudflare")
-            {
-                ip = "1.1.1.1";
-                return ip;
-
-            }
-            else if (destinationCombo.SelectedItem.ToString() == "Google")
-            {
-                ip = "8.8.8.8";
-                return ip;
-            }
-            else
-            {
-                return ip;
-            }
-        }
-
-        private async Task AdvancedHttpClient()
-        {
-            try
-            {// AdvancedHttpClient
-                IServiceCollection services = new ServiceCollection();
-                serverLabel.Text = "Server: ";
-
-                Uri dnsUri = EnteredUriHttp();
-                if (dnsUri == null)
-                {
-                    throw new Exception("You have not chose the destination!");
-                }
-
-                services.AddHttpClient<IDnsClient, DnsHttpClient>(x => x.BaseAddress = dnsUri)
-                        .AddTransientHttpErrorPolicy(x =>
-                                               x.WaitAndRetryAsync(3, attempt => TimeSpan.FromSeconds(Math.Pow(2, attempt))));
-
-                using ServiceProvider provider = services.BuildServiceProvider();
-
-                using IDnsClient dnsClient = provider.GetRequiredService<IDnsClient>();
-                //using var memoryCache = new MemoryCache("dns");
-                using IDnsClient cacheClient = new DnsCachingClient(dnsClient, memoryCache);
-
-                await StartQuery(cacheClient, true);
-
-                serverLabel.Text += dnsUri;
-            }
-            catch (Exception ex)
-            {
-                activityContainer.Items.Add("Error: " + ex.Message);
-            }
-        }
-
-        private async Task BasicUdpClient()
-        {
-            try
-            {
-                string ip = EnteredUriUdp();
-                if (ip == "")
-                {
-                    throw new Exception("You have not chose the destination!");
-                }
-                serverLabel.Text = "Server: ";
-                using IDnsClient dnsClient = new DnsUdpClient(IPAddress.Parse(ip));
-                //using var memoryCache = new MemoryCache("dns");
-                using IDnsClient cacheClient = new DnsCachingClient(dnsClient, memoryCache);
-
-                await StartQuery(cacheClient, false);
-
-                serverLabel.Text += ip;
-            }
-            catch (Exception ex)
-            {
-                activityContainer.Items.Add("Error: " + ex.Message);
-            }
         }
 
         private async void sendButton_Click(object sender, EventArgs e)
         {
-            try
-            {
-                if (httpRadioButton.Checked)
-                {
-                    resContainer.Items.Add("HTTP Client");
-                    await AdvancedHttpClient();
-                }
-                else if (udpRadioButton.Checked)
-                {
-                    resContainer.Items.Add("UDP Client");
-                    await BasicUdpClient();
-                }
-                else
-                {
-                    MessageBox.Show("Please select a server type", "Error!");
-                }
-            }
-            catch (Exception ex)
-            {
-                activityContainer.Items.Add("Error: " + ex.Message);
-            }
-        }
+            string time = DateTime.Now.ToString();
+            when.Text = time;
+            queryTime.Text = "";
+            server.Text = "";
+            messageSize.Text = "";
+            ClientRequest request = new ClientRequest("127.0.0.1", 8080);
 
-        private void createNewClientButton_Click(object sender, EventArgs e)
-        {
-            Client client = new Client();
-            client.Show();
+            // Get the selected record type from the combo box
+            RecordType selectedRecordType = (RecordType)Enum.Parse(typeof(RecordType), type.SelectedItem.ToString());
+
+            request.Questions.Add(new Question(Domain.FromString(domainInput.Text), selectedRecordType, RecordClass.IN));
+            request.RecursionDesired = true;
+
+            // start timer
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+
+            IResponse result = await request.Resolve();
+
+            // stop timer
+            watch.Stop();
+            var elapsedMs = watch.ElapsedMilliseconds;
+
+            // Add the answer records to the responseBox
+            foreach (var record in result.AnswerRecords)
+            {
+                responseBox.Items.Add(time);
+                responseBox.Items.Add(record.ToString());
+                responseBox.Items.Add("-------------------------");
+            }
+
+            queryTime.Text = $"{elapsedMs} ms";
+            server.Text = "8.8.8.8";
+            messageSize.Text = $"{result.Size} bytes";
         }
 
         private void clearButton_Click(object sender, EventArgs e)
         {
-            resContainer.Items.Clear();
-            activityContainer.Items.Clear();
+            responseBox.Items.Clear();
         }
     }
 }

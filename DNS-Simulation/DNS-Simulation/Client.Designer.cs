@@ -3,12 +3,12 @@
     partial class Client
     {
         /// <summary>
-        ///  Required designer variable.
+        /// Required designer variable.
         /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
-        ///  Clean up any resources being used.
+        /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
@@ -23,243 +23,158 @@
         #region Windows Form Designer generated code
 
         /// <summary>
-        ///  Required method for Designer support - do not modify
-        ///  the contents of this method with the code editor.
+        /// Required method for Designer support - do not modify
+        /// the contents of this method with the code editor.
         /// </summary>
         private void InitializeComponent()
         {
             label1 = new Label();
-            label2 = new Label();
-            resDisplay = new GroupBox();
-            resContainer = new ListBox();
-            metricsContainer = new GroupBox();
-            atTime = new Label();
-            serverLabel = new Label();
-            duration = new Label();
             domainInput = new TextBox();
-            rcTypeCombo = new ComboBox();
             sendButton = new Button();
-            activityLog = new GroupBox();
-            activityContainer = new ListBox();
-            httpRadioButton = new RadioButton();
-            udpRadioButton = new RadioButton();
-            createNewClientButton = new Button();
-            label3 = new Label();
-            destinationCombo = new ComboBox();
+            responseBox = new ListBox();
+            groupBox1 = new GroupBox();
+            messageSize = new Label();
+            when = new Label();
+            server = new Label();
+            queryTime = new Label();
             clearButton = new Button();
-            resDisplay.SuspendLayout();
-            metricsContainer.SuspendLayout();
-            activityLog.SuspendLayout();
+            label2 = new Label();
+            type = new ComboBox();
+            groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(27, 15);
+            label1.Location = new Point(20, 16);
             label1.Name = "label1";
             label1.Size = new Size(62, 20);
             label1.TabIndex = 0;
             label1.Text = "Domain";
             // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(27, 57);
-            label2.Name = "label2";
-            label2.Size = new Size(89, 20);
-            label2.TabIndex = 1;
-            label2.Text = "Record type";
-            // 
-            // resDisplay
-            // 
-            resDisplay.Controls.Add(resContainer);
-            resDisplay.Location = new Point(21, 104);
-            resDisplay.Name = "resDisplay";
-            resDisplay.Size = new Size(458, 279);
-            resDisplay.TabIndex = 2;
-            resDisplay.TabStop = false;
-            resDisplay.Text = "Response Display";
-            // 
-            // resContainer
-            // 
-            resContainer.FormattingEnabled = true;
-            resContainer.HorizontalScrollbar = true;
-            resContainer.ItemHeight = 20;
-            resContainer.Location = new Point(6, 26);
-            resContainer.Name = "resContainer";
-            resContainer.Size = new Size(446, 244);
-            resContainer.TabIndex = 0;
-            // 
-            // metricsContainer
-            // 
-            metricsContainer.Controls.Add(atTime);
-            metricsContainer.Controls.Add(serverLabel);
-            metricsContainer.Controls.Add(duration);
-            metricsContainer.Location = new Point(21, 399);
-            metricsContainer.Name = "metricsContainer";
-            metricsContainer.Size = new Size(458, 159);
-            metricsContainer.TabIndex = 3;
-            metricsContainer.TabStop = false;
-            metricsContainer.Text = "Metrics";
-            // 
-            // atTime
-            // 
-            atTime.AutoSize = true;
-            atTime.Location = new Point(6, 106);
-            atTime.Name = "atTime";
-            atTime.Size = new Size(54, 20);
-            atTime.TabIndex = 2;
-            atTime.Text = "When: ";
-            // 
-            // serverLabel
-            // 
-            serverLabel.AutoSize = true;
-            serverLabel.Location = new Point(6, 72);
-            serverLabel.Name = "serverLabel";
-            serverLabel.Size = new Size(57, 20);
-            serverLabel.TabIndex = 1;
-            serverLabel.Text = "Server: ";
-            // 
-            // duration
-            // 
-            duration.AutoSize = true;
-            duration.Location = new Point(6, 38);
-            duration.Name = "duration";
-            duration.Size = new Size(89, 20);
-            duration.TabIndex = 0;
-            duration.Text = "Query time: ";
-            // 
             // domainInput
             // 
-            domainInput.Location = new Point(95, 12);
+            domainInput.Location = new Point(88, 13);
             domainInput.Name = "domainInput";
-            domainInput.Size = new Size(294, 27);
-            domainInput.TabIndex = 4;
-            // 
-            // rcTypeCombo
-            // 
-            rcTypeCombo.FormattingEnabled = true;
-            rcTypeCombo.Items.AddRange(new object[] { "A", "AAAA", "CNAME", "MX", "NS", "PTR", "SOA" });
-            rcTypeCombo.Location = new Point(122, 54);
-            rcTypeCombo.Name = "rcTypeCombo";
-            rcTypeCombo.Size = new Size(127, 28);
-            rcTypeCombo.TabIndex = 5;
+            domainInput.Size = new Size(194, 27);
+            domainInput.TabIndex = 1;
             // 
             // sendButton
             // 
-            sendButton.Location = new Point(562, 27);
+            sendButton.BackColor = SystemColors.ActiveCaption;
+            sendButton.Location = new Point(573, 12);
             sendButton.Name = "sendButton";
-            sendButton.Size = new Size(103, 50);
-            sendButton.TabIndex = 6;
-            sendButton.Text = "SEND";
-            sendButton.UseVisualStyleBackColor = true;
+            sendButton.Size = new Size(94, 29);
+            sendButton.TabIndex = 2;
+            sendButton.Text = "Send";
+            sendButton.UseVisualStyleBackColor = false;
             sendButton.Click += sendButton_Click;
             // 
-            // activityLog
+            // responseBox
             // 
-            activityLog.Controls.Add(activityContainer);
-            activityLog.Location = new Point(533, 104);
-            activityLog.Name = "activityLog";
-            activityLog.Size = new Size(458, 279);
-            activityLog.TabIndex = 3;
-            activityLog.TabStop = false;
-            activityLog.Text = "Actitity Log";
+            responseBox.FormattingEnabled = true;
+            responseBox.HorizontalScrollbar = true;
+            responseBox.ItemHeight = 20;
+            responseBox.Location = new Point(20, 64);
+            responseBox.Name = "responseBox";
+            responseBox.Size = new Size(768, 224);
+            responseBox.TabIndex = 3;
             // 
-            // activityContainer
+            // groupBox1
             // 
-            activityContainer.FormattingEnabled = true;
-            activityContainer.HorizontalScrollbar = true;
-            activityContainer.ItemHeight = 20;
-            activityContainer.Location = new Point(6, 26);
-            activityContainer.Name = "activityContainer";
-            activityContainer.Size = new Size(446, 244);
-            activityContainer.TabIndex = 0;
+            groupBox1.Controls.Add(messageSize);
+            groupBox1.Controls.Add(when);
+            groupBox1.Controls.Add(server);
+            groupBox1.Controls.Add(queryTime);
+            groupBox1.Location = new Point(20, 304);
+            groupBox1.Name = "groupBox1";
+            groupBox1.Size = new Size(768, 164);
+            groupBox1.TabIndex = 4;
+            groupBox1.TabStop = false;
+            groupBox1.Text = "Summary";
             // 
-            // httpRadioButton
+            // messageSize
             // 
-            httpRadioButton.AutoSize = true;
-            httpRadioButton.Location = new Point(403, 15);
-            httpRadioButton.Name = "httpRadioButton";
-            httpRadioButton.Size = new Size(65, 24);
-            httpRadioButton.TabIndex = 7;
-            httpRadioButton.TabStop = true;
-            httpRadioButton.Text = "HTTP";
-            httpRadioButton.UseVisualStyleBackColor = true;
+            messageSize.AutoSize = true;
+            messageSize.Location = new Point(12, 132);
+            messageSize.Name = "messageSize";
+            messageSize.Size = new Size(103, 20);
+            messageSize.TabIndex = 8;
+            messageSize.Text = "Message size: ";
             // 
-            // udpRadioButton
+            // when
             // 
-            udpRadioButton.AutoSize = true;
-            udpRadioButton.Location = new Point(474, 15);
-            udpRadioButton.Name = "udpRadioButton";
-            udpRadioButton.Size = new Size(59, 24);
-            udpRadioButton.TabIndex = 8;
-            udpRadioButton.TabStop = true;
-            udpRadioButton.Text = "UDP";
-            udpRadioButton.UseVisualStyleBackColor = true;
+            when.AutoSize = true;
+            when.Location = new Point(12, 98);
+            when.Name = "when";
+            when.Size = new Size(54, 20);
+            when.TabIndex = 7;
+            when.Text = "When: ";
             // 
-            // createNewClientButton
+            // server
             // 
-            createNewClientButton.Location = new Point(689, 456);
-            createNewClientButton.Name = "createNewClientButton";
-            createNewClientButton.Size = new Size(162, 50);
-            createNewClientButton.TabIndex = 9;
-            createNewClientButton.Text = "NEW CLIENT";
-            createNewClientButton.UseVisualStyleBackColor = true;
-            createNewClientButton.Click += createNewClientButton_Click;
+            server.AutoSize = true;
+            server.Location = new Point(12, 65);
+            server.Name = "server";
+            server.Size = new Size(57, 20);
+            server.TabIndex = 6;
+            server.Text = "Server: ";
             // 
-            // label3
+            // queryTime
             // 
-            label3.AutoSize = true;
-            label3.Location = new Point(277, 57);
-            label3.Name = "label3";
-            label3.Size = new Size(69, 20);
-            label3.TabIndex = 10;
-            label3.Text = "To where";
-            // 
-            // destinationCombo
-            // 
-            destinationCombo.FormattingEnabled = true;
-            destinationCombo.Items.AddRange(new object[] { "Local 1", "Local 2", "Cloudflare", "Google" });
-            destinationCombo.Location = new Point(352, 54);
-            destinationCombo.Name = "destinationCombo";
-            destinationCombo.Size = new Size(127, 28);
-            destinationCombo.TabIndex = 11;
+            queryTime.AutoSize = true;
+            queryTime.Location = new Point(12, 32);
+            queryTime.Name = "queryTime";
+            queryTime.Size = new Size(89, 20);
+            queryTime.TabIndex = 5;
+            queryTime.Text = "Query time: ";
             // 
             // clearButton
             // 
-            clearButton.Location = new Point(831, 27);
+            clearButton.BackColor = Color.RosyBrown;
+            clearButton.Location = new Point(694, 12);
             clearButton.Name = "clearButton";
-            clearButton.Size = new Size(160, 50);
-            clearButton.TabIndex = 12;
-            clearButton.Text = "CLEAR";
-            clearButton.UseVisualStyleBackColor = true;
+            clearButton.Size = new Size(94, 29);
+            clearButton.TabIndex = 5;
+            clearButton.Text = "Clear";
+            clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += clearButton_Click;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(304, 16);
+            label2.Name = "label2";
+            label2.Size = new Size(40, 20);
+            label2.TabIndex = 6;
+            label2.Text = "Type";
+            // 
+            // type
+            // 
+            type.FormattingEnabled = true;
+            type.Items.AddRange(new object[] { "PTR", "A", "AAAA", "CNAME", "ANY", "MX", "NS", "SOA" });
+            type.Location = new Point(350, 13);
+            type.Name = "type";
+            type.Size = new Size(151, 28);
+            type.TabIndex = 7;
             // 
             // Client
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1031, 585);
-            Controls.Add(clearButton);
-            Controls.Add(destinationCombo);
-            Controls.Add(label3);
-            Controls.Add(createNewClientButton);
-            Controls.Add(udpRadioButton);
-            Controls.Add(httpRadioButton);
-            Controls.Add(activityLog);
-            Controls.Add(sendButton);
-            Controls.Add(rcTypeCombo);
-            Controls.Add(domainInput);
-            Controls.Add(metricsContainer);
-            Controls.Add(resDisplay);
+            ClientSize = new Size(800, 480);
+            Controls.Add(type);
             Controls.Add(label2);
+            Controls.Add(clearButton);
+            Controls.Add(groupBox1);
+            Controls.Add(responseBox);
+            Controls.Add(sendButton);
+            Controls.Add(domainInput);
             Controls.Add(label1);
             Name = "Client";
             Text = "Client";
-            resDisplay.ResumeLayout(false);
-            metricsContainer.ResumeLayout(false);
-            metricsContainer.PerformLayout();
-            activityLog.ResumeLayout(false);
+            groupBox1.ResumeLayout(false);
+            groupBox1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -267,23 +182,16 @@
         #endregion
 
         private Label label1;
-        private Label label2;
-        private GroupBox resDisplay;
-        private GroupBox metricsContainer;
         private TextBox domainInput;
-        private ComboBox rcTypeCombo;
         private Button sendButton;
-        private ListBox resContainer;
-        private Label atTime;
-        private Label serverLabel;
-        private Label duration;
-        private GroupBox activityLog;
-        private ListBox activityContainer;
-        private RadioButton httpRadioButton;
-        private RadioButton udpRadioButton;
-        private Button createNewClientButton;
-        private Label label3;
-        private ComboBox destinationCombo;
+        private ListBox responseBox;
+        private GroupBox groupBox1;
+        private Label when;
+        private Label server;
+        private Label queryTime;
+        private Label messageSize;
         private Button clearButton;
+        private Label label2;
+        private ComboBox type;
     }
 }
