@@ -37,10 +37,20 @@ namespace DNS_Simulation
 
 
             // Log the requests, responses, and errors
-            server.Requested += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Request: {s.Request}")));
+            server.Requested += (s, args) =>
+            {
+                var request = args.Request;
+                var remoteEndpoint = args.Remote;
+
+                serverLog.Invoke(new Action(() =>
+                {
+                    serverLog.Items.Add($"DNS request received from: {remoteEndpoint} for {request.Questions[0].Name}");
+                }));
+            };
+
             server.Responded += (sender, s) =>
             {
-                if (s.Response.AnswerRecords[0].Name.ToString() == 
+                if (s.Response.AnswerRecords.Count > 0)                    
                 {
                     serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {s.Response.AnswerRecords[0].Data}")));
                 }
@@ -54,14 +64,13 @@ namespace DNS_Simulation
             };
             server.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error: {s.Exception.Message}")));
             server.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Listening...")));
-            //server.Received += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Client connected: {s.EndPoint}")));
-
+            // server.Received += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Client connected: {s.EndPoint}")));
             server.Listening += async (sender, s) =>
             {
                 DnsClient client = new DnsClient("127.0.0.1", 8080);
 
-                await client.Lookup("google.com").ConfigureAwait(false);
-                await client.Lookup("facebook.com").ConfigureAwait(false);
+                //await client.Lookup("google.com").ConfigureAwait(false);
+                //await client.Lookup("facebook.com").ConfigureAwait(false);
                 serverLog.Invoke(new Action(() => serverLog.Items.Add("Lookup complete")));
             };
 

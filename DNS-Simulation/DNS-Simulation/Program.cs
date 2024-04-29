@@ -12,9 +12,11 @@ namespace DNS_Simulation
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
 
-            Client client = new Client();
+            Client client1 = new Client();
+            Client client2 = new Client();
             Server server = new Server();
-            client.Show();
+            client1.Show();
+            client2.Show();
             server.Show();
             Application.Run();
         }
