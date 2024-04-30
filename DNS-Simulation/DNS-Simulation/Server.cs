@@ -12,6 +12,7 @@ using DNS.Client;
 using DNS.Server;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
+using System.Data.SQLite;
 
 namespace DNS_Simulation
 {
@@ -20,6 +21,41 @@ namespace DNS_Simulation
         public Server()
         {
             InitializeComponent();
+            InitializeDatabase();
+        }
+
+        private void InitializeDatabase()
+        {
+            // change source database
+            string connectionString = "Data Source=E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\NameSpace.db;Version=3;";
+            connection = new SQLiteConnection(connectionString);
+            connection.Open();
+
+            //create table if not exists
+            string createTableQuery = "CREATE TABLE IF NOT EXISTS DNSRecords (DomainName TEXT PRIMARY KEY, IPAddress TEXT, Type TEXT,Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
+            SQLiteCommand createTableCommand = new SQLiteCommand(createTableQuery, connection);
+            createTableCommand.ExecuteNonQuery();
+        }
+
+        private SQLiteConnection connection;
+
+        private void AddOrUpdateRecord(string domainName, string ipAddress, string type)
+        {
+            string insertOrUpdateQuery = "INSERT OR REPLACE INTO DNSRecords (DomainName, IPAddress, Type) VALUES (@DomainName, @IPAddress, @Type)";
+            SQLiteCommand command = new SQLiteCommand(insertOrUpdateQuery, connection);
+            command.Parameters.AddWithValue("@DomainName", domainName);
+            command.Parameters.AddWithValue("@IPAddress", ipAddress);
+            command.Parameters.AddWithValue("@Type", type);
+            command.ExecuteNonQuery();
+        }
+
+        private string GetIPAddress(string domainName)
+        {
+            string selectQuery = "SELECT IPAddress FROM DNSRecords WHERE DomainName = @DomainName";
+            SQLiteCommand command = new SQLiteCommand(selectQuery, connection);
+            command.Parameters.AddWithValue("@DomainName", domainName);
+            object result = command.ExecuteScalar();
+            return result != null ? result.ToString() : null;
         }
 
         private async void listenButton_Click(object sender, EventArgs e)
@@ -50,7 +86,7 @@ namespace DNS_Simulation
 
             server.Responded += (sender, s) =>
             {
-                if (s.Response.AnswerRecords.Count > 0)                    
+                if (s.Response.AnswerRecords.Count > 0)
                 {
                     serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {s.Response.AnswerRecords[0].Data}")));
                 }
@@ -61,6 +97,13 @@ namespace DNS_Simulation
                     masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), s.Response.AnswerRecords[0].Data.ToString());
                     serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {s.Response.AnswerRecords[0].Data}")));
                 }
+
+                string domainName = s.Request.Questions[0].Name.ToString();
+                string ipAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data).ToString();
+                string type = s.Request.Questions[0].Type.ToString();
+
+                //update datase
+                AddOrUpdateRecord(domainName, ipAddress, type);
             };
             server.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error: {s.Exception.Message}")));
             server.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Listening...")));
@@ -76,6 +119,20 @@ namespace DNS_Simulation
 
             IPAddress ip = IPAddress.Parse("127.0.0.1");
             await server.Listen(8080, ip).ConfigureAwait(false);
+        }
+
+        private void refreshButton_Click(object sender, EventArgs e)
+        {
+            DeleteExpiredRecords();
+        }
+
+
+        private void DeleteExpiredRecords()
+        {
+            string deleteQuery = "DELETE FROM DNSRecords WHERE strftime('%s', 'now') - strftime('%s', Timestamp) > 60;\r\n"; // Xóa bản ghi có thời gian tồn tại hơn 1 phút
+            SQLiteCommand command = new SQLiteCommand(deleteQuery, connection);
+            int deletedRows = command.ExecuteNonQuery();
+            serverLog.Items.Add($"{deletedRows} records deleted.");
         }
     }
 }
