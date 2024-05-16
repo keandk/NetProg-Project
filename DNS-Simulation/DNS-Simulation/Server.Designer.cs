@@ -31,27 +31,36 @@
             serverLog = new ListBox();
             listenButton = new Button();
             refreshButton = new Button();
+            serverLogGroup = new GroupBox();
+            dataGroup = new GroupBox();
+            recordGridView = new DataGridView();
+            domain = new DataGridViewTextBoxColumn();
+            ttl = new DataGridViewTextBoxColumn();
+            ttd = new DataGridViewTextBoxColumn();
+            ipAddress = new DataGridViewTextBoxColumn();
+            type = new DataGridViewTextBoxColumn();
+            serverLogGroup.SuspendLayout();
+            dataGroup.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)recordGridView).BeginInit();
             SuspendLayout();
             // 
             // serverLog
             // 
             serverLog.FormattingEnabled = true;
             serverLog.HorizontalScrollbar = true;
-            serverLog.ItemHeight = 15;
-            serverLog.Location = new Point(10, 9);
-            serverLog.Margin = new Padding(3, 2, 3, 2);
+            serverLog.ItemHeight = 20;
+            serverLog.Location = new Point(6, 26);
             serverLog.Name = "serverLog";
             serverLog.SelectionMode = SelectionMode.MultiSimple;
-            serverLog.Size = new Size(680, 259);
+            serverLog.Size = new Size(777, 344);
             serverLog.TabIndex = 0;
             // 
             // listenButton
             // 
             listenButton.BackColor = SystemColors.ActiveCaption;
-            listenButton.Location = new Point(309, 290);
-            listenButton.Margin = new Padding(3, 2, 3, 2);
+            listenButton.Location = new Point(347, 396);
             listenButton.Name = "listenButton";
-            listenButton.Size = new Size(82, 22);
+            listenButton.Size = new Size(94, 29);
             listenButton.TabIndex = 1;
             listenButton.Text = "Listen";
             listenButton.UseVisualStyleBackColor = false;
@@ -60,26 +69,94 @@
             // refreshButton
             // 
             refreshButton.BackColor = SystemColors.ActiveCaption;
-            refreshButton.Location = new Point(465, 290);
-            refreshButton.Margin = new Padding(3, 2, 3, 2);
+            refreshButton.Location = new Point(347, 396);
             refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(82, 22);
+            refreshButton.Size = new Size(94, 29);
             refreshButton.TabIndex = 2;
             refreshButton.Text = "Refresh";
             refreshButton.UseVisualStyleBackColor = false;
             refreshButton.Click += refreshButton_Click;
             // 
+            // serverLogGroup
+            // 
+            serverLogGroup.Controls.Add(serverLog);
+            serverLogGroup.Controls.Add(listenButton);
+            serverLogGroup.Location = new Point(12, 12);
+            serverLogGroup.Name = "serverLogGroup";
+            serverLogGroup.Size = new Size(789, 456);
+            serverLogGroup.TabIndex = 3;
+            serverLogGroup.TabStop = false;
+            serverLogGroup.Text = "Server Log";
+            // 
+            // dataGroup
+            // 
+            dataGroup.Controls.Add(recordGridView);
+            dataGroup.Controls.Add(refreshButton);
+            dataGroup.Location = new Point(831, 12);
+            dataGroup.Name = "dataGroup";
+            dataGroup.Size = new Size(789, 456);
+            dataGroup.TabIndex = 4;
+            dataGroup.TabStop = false;
+            dataGroup.Text = "Data";
+            // 
+            // recordGridView
+            // 
+            recordGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            recordGridView.Columns.AddRange(new DataGridViewColumn[] { domain, ttl, ttd, ipAddress, type });
+            recordGridView.Location = new Point(6, 26);
+            recordGridView.Name = "recordGridView";
+            recordGridView.RowHeadersWidth = 51;
+            recordGridView.RowTemplate.Height = 29;
+            recordGridView.Size = new Size(777, 344);
+            recordGridView.TabIndex = 0;
+            // 
+            // domain
+            // 
+            domain.HeaderText = "Domain";
+            domain.MinimumWidth = 6;
+            domain.Name = "domain";
+            domain.Width = 125;
+            // 
+            // ttl
+            // 
+            ttl.HeaderText = "TTL";
+            ttl.MinimumWidth = 6;
+            ttl.Name = "ttl";
+            ttl.Width = 125;
+            // 
+            // ttd
+            // 
+            ttd.HeaderText = "TTD";
+            ttd.MinimumWidth = 6;
+            ttd.Name = "ttd";
+            ttd.Width = 125;
+            // 
+            // ipAddress
+            // 
+            ipAddress.HeaderText = "IP Address";
+            ipAddress.MinimumWidth = 6;
+            ipAddress.Name = "ipAddress";
+            ipAddress.Width = 125;
+            // 
+            // type
+            // 
+            type.HeaderText = "Type";
+            type.MinimumWidth = 6;
+            type.Name = "type";
+            type.Width = 125;
+            // 
             // Server
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(700, 338);
-            Controls.Add(refreshButton);
-            Controls.Add(listenButton);
-            Controls.Add(serverLog);
-            Margin = new Padding(3, 2, 3, 2);
+            ClientSize = new Size(1631, 480);
+            Controls.Add(dataGroup);
+            Controls.Add(serverLogGroup);
             Name = "Server";
             Text = "Server";
+            serverLogGroup.ResumeLayout(false);
+            dataGroup.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)recordGridView).EndInit();
             ResumeLayout(false);
         }
 
@@ -88,5 +165,13 @@
         private ListBox serverLog;
         private Button listenButton;
         private Button refreshButton;
+        private GroupBox serverLogGroup;
+        private GroupBox dataGroup;
+        private DataGridView recordGridView;
+        private DataGridViewTextBoxColumn domain;
+        private DataGridViewTextBoxColumn ttl;
+        private DataGridViewTextBoxColumn ttd;
+        private DataGridViewTextBoxColumn ipAddress;
+        private DataGridViewTextBoxColumn type;
     }
 }

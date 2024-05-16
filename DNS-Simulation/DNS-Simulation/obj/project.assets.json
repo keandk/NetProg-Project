@@ -2901,19 +2901,19 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\Admin\\.nuget\\packages\\": {}
+    "C:\\Users\\luutr\\.nuget\\packages\\": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+      "projectUniqueName": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
       "projectName": "DNS-Simulation",
-      "projectPath": "E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
-      "packagesPath": "C:\\Users\\Admin\\.nuget\\packages\\",
-      "outputPath": "E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
+      "projectPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+      "packagesPath": "C:\\Users\\luutr\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
-        "C:\\Users\\Admin\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\luutr\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
@@ -2933,6 +2933,11 @@
         "warnAsError": [
           "NU1605"
         ]
+      },
+      "restoreAuditProperties": {
+        "enableAudit": "true",
+        "auditLevel": "low",
+        "auditMode": "direct"
       }
     },
     "frameworks": {
@@ -2995,7 +3000,7 @@
             "privateAssets": "none"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.100\\RuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.204\\RuntimeIdentifierGraph.json"
       }
     }
   }
