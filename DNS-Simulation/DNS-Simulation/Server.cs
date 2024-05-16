@@ -24,25 +24,48 @@ namespace DNS_Simulation
             InitializeDatabase();
         }
 
+        private SQLiteConnection connection_Namespace;
+        private SQLiteConnection connection_Resolver;
+
         private void InitializeDatabase()
         {
             // change source database
-            string connectionString = "Data Source=E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\NameSpace.db;Version=3;";
-            connection = new SQLiteConnection(connectionString);
-            connection.Open();
+            string connectionString_Namespace = "Data Source=E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\NameSpace.db;Version=3;";
+            connection_Namespace = new SQLiteConnection(connectionString_Namespace);
+            connection_Namespace.Open();
+            
+
+            string connectionString_Resolver = "Data Source=E:\\ThnBih_HK4\\LTMangCanBan\\DOAN_new\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\Resolver.db;Version=3;";
+            connection_Resolver = new SQLiteConnection(connectionString_Resolver);
+            connection_Resolver.Open();
+            
 
             //create table if not exists
             string createTableQuery = "CREATE TABLE IF NOT EXISTS DNSRecords (DomainName TEXT PRIMARY KEY, IPAddress TEXT, Type TEXT,Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
-            SQLiteCommand createTableCommand = new SQLiteCommand(createTableQuery, connection);
-            createTableCommand.ExecuteNonQuery();
+
+            SQLiteCommand createTableCommand_Namespace = new SQLiteCommand(createTableQuery, connection_Namespace);
+            SQLiteCommand createTableCommand_Resolver = new SQLiteCommand(createTableQuery, connection_Resolver);
+
+            createTableCommand_Namespace.ExecuteNonQuery();
+            createTableCommand_Resolver.ExecuteNonQuery();
         }
 
-        private SQLiteConnection connection;
 
-        private void AddOrUpdateRecord(string domainName, string ipAddress, string type)
+
+        private void AddOrUpdateRecord_Namespace(string domainName, string ipAddress, string type)
         {
             string insertOrUpdateQuery = "INSERT OR REPLACE INTO DNSRecords (DomainName, IPAddress, Type) VALUES (@DomainName, @IPAddress, @Type)";
-            SQLiteCommand command = new SQLiteCommand(insertOrUpdateQuery, connection);
+            SQLiteCommand command = new SQLiteCommand(insertOrUpdateQuery, connection_Namespace);
+            command.Parameters.AddWithValue("@DomainName", domainName);
+            command.Parameters.AddWithValue("@IPAddress", ipAddress);
+            command.Parameters.AddWithValue("@Type", type);
+            command.ExecuteNonQuery();
+        }
+
+        private void AddOrUpdateRecord_Resolver(string domainName, string ipAddress, string type)
+        { 
+            string insertOrUpdateQuery = "INSERT OR REPLACE INTO DNSRecords (DomainName, IPAddress, Type) VALUES (@DomainName, @IPAddress, @Type)";
+            SQLiteCommand command = new SQLiteCommand(insertOrUpdateQuery, connection_Resolver);
             command.Parameters.AddWithValue("@DomainName", domainName);
             command.Parameters.AddWithValue("@IPAddress", ipAddress);
             command.Parameters.AddWithValue("@Type", type);
@@ -52,7 +75,7 @@ namespace DNS_Simulation
         private string GetIPAddress(string domainName)
         {
             string selectQuery = "SELECT IPAddress FROM DNSRecords WHERE DomainName = @DomainName";
-            SQLiteCommand command = new SQLiteCommand(selectQuery, connection);
+            SQLiteCommand command = new SQLiteCommand(selectQuery, connection_Namespace);
             command.Parameters.AddWithValue("@DomainName", domainName);
             object result = command.ExecuteScalar();
             return result != null ? result.ToString() : null;
@@ -103,7 +126,10 @@ namespace DNS_Simulation
                 string type = s.Request.Questions[0].Type.ToString();
 
                 //update datase
-                AddOrUpdateRecord(domainName, ipAddress, type);
+                AddOrUpdateRecord_Namespace(domainName, ipAddress, type);
+                
+                AddOrUpdateRecord_Resolver(domainName, ipAddress, type);
+        
             };
             server.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error: {s.Exception.Message}")));
             server.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Listening...")));
@@ -123,16 +149,25 @@ namespace DNS_Simulation
 
         private void refreshButton_Click(object sender, EventArgs e)
         {
-            DeleteExpiredRecords();
+            DeleteExpiredRecords_Namespace();
+            DeleteExpiredRecords_Resolver();
         }
 
 
-        private void DeleteExpiredRecords()
+        private void DeleteExpiredRecords_Namespace()
         {
             string deleteQuery = "DELETE FROM DNSRecords WHERE strftime('%s', 'now') - strftime('%s', Timestamp) > 60;\r\n"; // Xóa bản ghi có thời gian tồn tại hơn 1 phút
-            SQLiteCommand command = new SQLiteCommand(deleteQuery, connection);
+            SQLiteCommand command = new SQLiteCommand(deleteQuery, connection_Namespace);
             int deletedRows = command.ExecuteNonQuery();
-            serverLog.Items.Add($"{deletedRows} records deleted.");
+            serverLog.Items.Add($"{deletedRows} Namespace's records deleted.");
+        }
+
+        private void DeleteExpiredRecords_Resolver()
+        {
+            string deleteQuery = "DELETE FROM DNSRecords WHERE strftime('%s', 'now') - strftime('%s', Timestamp) > 90;\r\n"; // Xóa bản ghi có thời gian tồn tại hơn 1 phút
+            SQLiteCommand command = new SQLiteCommand(deleteQuery, connection_Resolver);
+            int deletedRows = command.ExecuteNonQuery();
+            serverLog.Items.Add($"{deletedRows} Resolver's records deleted.");
         }
     }
 }
