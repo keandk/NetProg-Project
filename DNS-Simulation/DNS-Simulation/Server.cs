@@ -14,14 +14,6 @@ using System.Reflection;
 
 namespace DNS_Simulation
 {
-    public static class ResourceRecordExtensions
-    {
-        public static DateTime GetTimestampAdded(this IResourceRecord record)
-        {
-            return DateTime.Now; // Assume the current timestamp as the added timestamp
-        }
-    }
-
     public partial class Server : Form
     {
         private SQLiteConnection connection_Namespace;
@@ -187,6 +179,8 @@ namespace DNS_Simulation
                         {
                             var responseIpAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data);
                             serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {responseIpAddress}")));
+                            masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), responseIpAddress.ToString());
+                            MessageBox.Show($"Record added: {s.Request.Questions[0].Name} -> {responseIpAddress}", "Record Added", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         catch (ArgumentException ex)
                         {
@@ -203,7 +197,13 @@ namespace DNS_Simulation
                                 try
                                 {
                                     var resolvedIpAddress = new System.Net.IPAddress(response.AnswerRecords[0].Data);
+
+                                    // Add the new request to the MasterFile
                                     masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), resolvedIpAddress.ToString());
+                                    MessageBox.Show($"Record added: {s.Request.Questions[0].Name} -> {resolvedIpAddress}", "Record Added", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                                    UpdateRecordGridView(masterFile);
+
+
                                     serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response.AnswerRecords[0]} -> {resolvedIpAddress}")));
                                 }
                                 catch (ArgumentException ex)
@@ -297,6 +297,14 @@ namespace DNS_Simulation
         {
             base.OnFormClosing(e);
             server?.Dispose();
+        }
+    }
+
+    public static class ResourceRecordExtensions
+    {
+        public static DateTime GetTimestampAdded(this IResourceRecord record)
+        {
+            return DateTime.Now; // Assume the current timestamp as the added timestamp
         }
     }
 }

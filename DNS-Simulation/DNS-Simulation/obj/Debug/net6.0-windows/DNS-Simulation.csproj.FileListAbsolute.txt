@@ -168,4 +168,4 @@ E:\ThnBih_HK4\LTMangCanBan\DOAN_new\NetProg-Project\DNS-Simulation\DNS-Simulatio
 E:\ThnBih_HK4\LTMangCanBan\DOAN_new\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Debug\net6.0-windows\DNS-Simulation.pdb
 E:\ThnBih_HK4\LTMangCanBan\DOAN_new\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Debug\net6.0-windows\DNS-Simulation.genruntimeconfig.cache
 E:\ThnBih_HK4\LTMangCanBan\DOAN_new\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Debug\net6.0-windows\ref\DNS-Simulation.dll
-C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Debug\net6.0-windows\DNS_Simulation.ResourceRecordExtensions.resources
+C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Debug\net6.0-windows\DNS_Simulation.Server.resources
