@@ -7,11 +7,11 @@
       "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
+      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
       "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\server.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\dns-simulation\\server.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\server.designer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
@@ -34,8 +34,7 @@
               "RelativeToolTip": "DNS-Simulation\\Server.Designer.cs",
               "ViewState": "AQIAAI0AAAAAAAAAAAAYwKEAAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-17T10:16:22.483Z",
-              "EditorCaption": ""
+              "WhenOpened": "2024-05-17T10:16:22.483Z"
             },
             {
               "$type": "Document",
@@ -45,7 +44,7 @@
               "RelativeDocumentMoniker": "DNS-Simulation\\Server.cs",
               "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Server.cs",
               "RelativeToolTip": "DNS-Simulation\\Server.cs",
-              "ViewState": "AQIAALMAAAAAAAAAAAAswL0AAAAYAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAABkAAAAJAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-05-17T10:13:49.806Z",
               "EditorCaption": ""
@@ -59,8 +58,7 @@
               "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Server.cs [Design]",
               "RelativeToolTip": "DNS-Simulation\\Server.cs [Design]",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-17T10:12:58.393Z",
-              "EditorCaption": " [Design]"
+              "WhenOpened": "2024-05-17T10:12:58.393Z"
             }
           ]
         }

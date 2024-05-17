@@ -116,11 +116,11 @@ namespace DNS_Simulation
                 string ipAddress = entry is IPAddressResourceRecord ? ((IPAddressResourceRecord)entry).IPAddress.ToString() : "";
                 string type = entry.Type.ToString();
 
-                // Check if the row for the current domain already exists
+                // Check if the row for the current domain and record type already exists
                 DataGridViewRow existingRow = null;
                 foreach (DataGridViewRow row in recordGridView.Rows)
                 {
-                    if (row.Cells["Domain"].Value?.ToString() == domain)
+                    if (row.Cells["Domain"].Value?.ToString() == domain && row.Cells["Type"].Value?.ToString() == type)
                     {
                         existingRow = row;
                         break;
@@ -180,7 +180,6 @@ namespace DNS_Simulation
                             var responseIpAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data);
                             serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {responseIpAddress}")));
                             masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), responseIpAddress.ToString());
-                            MessageBox.Show($"Record added: {s.Request.Questions[0].Name} -> {responseIpAddress}", "Record Added", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         }
                         catch (ArgumentException ex)
                         {
@@ -200,7 +199,6 @@ namespace DNS_Simulation
 
                                     // Add the new request to the MasterFile
                                     masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), resolvedIpAddress.ToString());
-                                    MessageBox.Show($"Record added: {s.Request.Questions[0].Name} -> {resolvedIpAddress}", "Record Added", MessageBoxButtons.OK, MessageBoxIcon.Information);
                                     UpdateRecordGridView(masterFile);
 
 
