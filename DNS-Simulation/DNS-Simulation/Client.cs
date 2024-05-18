@@ -3,17 +3,37 @@ using System.Linq;
 using System.Windows.Forms;
 using DNS.Client;
 using DNS.Protocol;
+using Ae.Dns.Client;
+using Ae.Dns.Metrics.InfluxDb;
+using Ae.Dns.Protocol;
+using Ae.Dns.Protocol.Enums;
+using Microsoft.Extensions.DependencyInjection;
+using Polly;
+using System.Diagnostics;
+using System.Net;
+using System.Runtime.Caching;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
 
 namespace DNS_Simulation
 {
     public partial class Client : Form
     {
-        private DnsClient dnsClient;
+        private DnsCachingClient dnsCachingClient;
+        private DnsClient dnsClientForMessSize;
 
         public Client()
         {
             InitializeComponent();
-            dnsClient = new DnsClient("127.0.0.1", 8080);
+
+            var dnsClient = new DnsUdpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080));
+
+            dnsClientForMessSize = new DnsClient("127.0.0.1", 8080);
+
+            var cache = new MemoryCache("DnsCache");
+
+            dnsCachingClient = new DnsCachingClient(dnsClient, cache);
         }
 
         private async void sendButton_Click(object sender, EventArgs e)
@@ -24,46 +44,62 @@ namespace DNS_Simulation
             server.Text = "";
             messageSize.Text = "";
 
-            // Get the selected record type from the combo box
             RecordType selectedRecordType = (RecordType)Enum.Parse(typeof(RecordType), type.SelectedItem.ToString());
 
             try
             {
-                // Start timer
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
-                IResponse result = await dnsClient.Resolve(domainInput.Text, selectedRecordType);
-
-                // Stop timer
-                watch.Stop();
-                var elapsedMs = watch.ElapsedMilliseconds;
-
-                if (result.AnswerRecords.Count > 0)
+                var query = new DnsMessage
                 {
-                    // Add the answer records to the responseBox
-                    foreach (var record in result.AnswerRecords)
+                    Header = new DnsHeader
                     {
-                        responseBox.Items.Add(time);
-                        responseBox.Items.Add(record.ToString());
-                        responseBox.Items.Add("-------------------------");
+                        Id = 1,
+                        Host = domainInput.Text,
+                        IsQueryResponse = false,
+                        RecursionDesired = true,
+                        QueryClass = DnsQueryClass.IN,
+                        QueryType = (DnsQueryType)selectedRecordType,
+                        QuestionCount = 1,
+                        AdditionalRecordCount = 0
                     }
+                };
+
+                var response = await dnsCachingClient.Query(query, CancellationToken.None);
+
+                watch.Stop();
+                
+                IResponse response1 = await dnsClientForMessSize.Resolve(domainInput.Text, selectedRecordType);
+                
+                var elapsedMs = watch.ElapsedMilliseconds;
+                string serverAddress = response.Answers.Last().ToString();
+                int startIndex = serverAddress.IndexOf("Resource: ") + "Resource: ".Length;
+                int endIndex = serverAddress.IndexOf(Environment.NewLine, startIndex);
+                if (startIndex > 0 && endIndex > 0)
+                {
+                    serverAddress = serverAddress.Substring(startIndex, endIndex - startIndex).Trim();
                 }
-                else
+
+                for (int i = 0; i < 1; i++)
+                {
+                    responseBox.Items.Add(time);
+                    responseBox.Items.Add(response.Answers[0].ToString());
+                    responseBox.Items.Add("-------------------------");
+                    server.Text = serverAddress;
+                }
+                if (response.Answers.Count == 0)
                 {
                     responseBox.Items.Add(time);
                     responseBox.Items.Add($"No response for requested record type {selectedRecordType} for {domainInput.Text}");
                     responseBox.Items.Add("-------------------------");
+
+                    server.Text = serverAddress;
                 }
 
                 queryTime.Text = $"{elapsedMs} ms";
-                server.Text = "127.0.0.1";
-                messageSize.Text = $"{result.Size} bytes";
-            }
-            catch (ResponseException ex)
-            {
-                responseBox.Items.Add(time);
-                responseBox.Items.Add($"Error: {ex.Message}");
-                responseBox.Items.Add("-------------------------");
+                //server.Text = response.;
+                //MessageBox.Show(response.Answers.Last().ToString());
+                messageSize.Text = $"{response1.Size} bytes";
             }
             catch (Exception ex)
             {

@@ -146,14 +146,9 @@ namespace DNS_Simulation
             try
             {
                 TimeSpan ttl = TimeSpan.FromMinutes(1);
-                MasterFile masterFile = new MasterFile(ttl);
+                CustomMasterFile masterFile = new CustomMasterFile(ttl);
                 resolver = masterFile;
                 server = new DnsServer(masterFile, "8.8.8.8");
-
-                System.Windows.Forms.Timer timer = new System.Windows.Forms.Timer();
-                timer.Interval = 1000; // Update every second
-                timer.Tick += (s, args) => UpdateRecordGridView(masterFile);
-                timer.Start();
 
                 masterFile.AddIPAddressResourceRecord("google.com", "127.0.0.1");
                 masterFile.AddIPAddressResourceRecord("facebook.com", "127.0.0.1");
@@ -173,41 +168,43 @@ namespace DNS_Simulation
 
                 server.Responded += async (sender, s) =>
                 {
-                    if (s.Response.AnswerRecords.Count > 0)
+                    string domainName = s.Request.Questions[0].Name.ToString();
+                    string ipAddress = string.Empty;
+                    string type = s.Request.Questions[0].Type.ToString();
+
+                    // Check if the requested record exists in the master file
+                    IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
+                    if (answers.Count > 0)
                     {
-                        try
+                        // If the record exists, add the answers to the response
+                        foreach (var answer in answers)
                         {
-                            var responseIpAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data);
-                            serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {responseIpAddress}")));
-                            masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), responseIpAddress.ToString());
+                            s.Response.AnswerRecords.Add(answer);
                         }
-                        catch (ArgumentException ex)
+                        
+                        // Extract the IP address from the first answer record
+                        if (answers[0] is IPAddressResourceRecord ipAddressRecord)
                         {
-                            serverLog.Invoke(new Action(() => serverLog.Items.Add($"Invalid IP address in response: {s.Response.AnswerRecords[0]}. {ex.Message}")));
+                            ipAddress = ipAddressRecord.IPAddress.ToString();
+                        }
+                        else if (answers[0] is PointerResourceRecord pointerRecord)
+                        {
+                            ipAddress = pointerRecord.PointerDomainName.ToString();
                         }
                     }
                     else
                     {
+                        // If the record does not exist, resolve it and add it to the master file
                         try
                         {
-                            var response = await Resolve(s.Request);
-                            if (response.AnswerRecords.Count > 0)
+                            await resolver.Resolve(s.Request);
+                            if (s.Response.AnswerRecords.Count > 0)
                             {
-                                try
-                                {
-                                    var resolvedIpAddress = new System.Net.IPAddress(response.AnswerRecords[0].Data);
-
-                                    // Add the new request to the MasterFile
-                                    masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), resolvedIpAddress.ToString());
-                                    UpdateRecordGridView(masterFile);
-
-
-                                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response.AnswerRecords[0]} -> {resolvedIpAddress}")));
-                                }
-                                catch (ArgumentException ex)
-                                {
-                                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Invalid IP address in resolved response: {response.AnswerRecords[0]}. {ex.Message}")));
-                                }
+                                var responseIpAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data);
+                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {responseIpAddress}")));
+                                masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), responseIpAddress.ToString());
+                                ipAddress = responseIpAddress.ToString();
                             }
                             else
                             {
@@ -217,23 +214,6 @@ namespace DNS_Simulation
                         catch (Exception ex)
                         {
                             serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error resolving domain: {s.Request.Questions[0].Name}. {ex.Message}")));
-                        }
-                    }
-
-                    string domainName = s.Request.Questions[0].Name.ToString();
-                    string ipAddress = string.Empty;
-                    string type = s.Request.Questions[0].Type.ToString();
-
-                    if (s.Response.AnswerRecords.Count > 0)
-                    {
-                        try
-                        {
-                            ipAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data).ToString();
-                        }
-                        catch (ArgumentException)
-                        {
-                            // Handle invalid IP address format
-                            ipAddress = "Invalid IP";
                         }
                     }
 
@@ -303,6 +283,16 @@ namespace DNS_Simulation
         public static DateTime GetTimestampAdded(this IResourceRecord record)
         {
             return DateTime.Now; // Assume the current timestamp as the added timestamp
+        }
+    }
+
+    public class CustomMasterFile : MasterFile
+    {
+        public CustomMasterFile(TimeSpan ttl) : base(ttl) { }
+
+        public new IList<IResourceRecord> Get(Domain domain, RecordType type)
+        {
+            return base.Get(domain, type);
         }
     }
 }
