@@ -15,6 +15,7 @@ using System.Runtime.Caching;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
+using System.Net.Sockets;
 
 namespace DNS_Simulation
 {
@@ -22,12 +23,18 @@ namespace DNS_Simulation
     {
         private DnsCachingClient dnsCachingClient;
         private DnsClient dnsClientForMessSize;
+        private UdpClient udpClient;
 
         public Client()
         {
             InitializeComponent();
 
-            var dnsClient = new DnsUdpClient(new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080));
+            var options = new DnsUdpClientOptions
+            {
+                Endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080),
+            };
+
+            var dnsClient = new DnsUdpClient(options);
 
             dnsClientForMessSize = new DnsClient("127.0.0.1", 8080);
 
@@ -80,10 +87,10 @@ namespace DNS_Simulation
                     serverAddress = serverAddress.Substring(startIndex, endIndex - startIndex).Trim();
                 }
 
-                for (int i = 0; i < 1; i++)
+                for (int i = 0; i < response.Answers.Count; i++)
                 {
                     responseBox.Items.Add(time);
-                    responseBox.Items.Add(response.Answers[0].ToString());
+                    responseBox.Items.Add(response.Answers[i].ToString());
                     responseBox.Items.Add("-------------------------");
                     server.Text = serverAddress;
                 }

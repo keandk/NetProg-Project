@@ -113,8 +113,34 @@ namespace DNS_Simulation
                 // Format the remaining TTL as a string (e.g., "mm:ss")
                 string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
 
-                string ipAddress = entry is IPAddressResourceRecord ? ((IPAddressResourceRecord)entry).IPAddress.ToString() : "";
+                string value = string.Empty;
                 string type = entry.Type.ToString();
+
+                switch (entry)
+                {
+                    case IPAddressResourceRecord ipAddressRecord:
+                        value = ipAddressRecord.IPAddress.ToString();
+                        break;
+                    case CanonicalNameResourceRecord cnameRecord:
+                        value = cnameRecord.CanonicalDomainName.ToString();
+                        break;
+                    case PointerResourceRecord ptrRecord:
+                        value = ptrRecord.PointerDomainName.ToString();
+                        break;
+                    case MailExchangeResourceRecord mxRecord:
+                        value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
+                        break;
+                    case NameServerResourceRecord nsRecord:
+                        value = nsRecord.NSDomainName.ToString();
+                        break;
+                    case TextResourceRecord txtRecord:
+                        value = txtRecord.ToStringTextData();
+                        break;
+                    case ServiceResourceRecord srvRecord:
+                        value = $"{srvRecord.Priority} {srvRecord.Weight} {srvRecord.Port} {srvRecord.Target}";
+                        break;
+                        // Add more cases for other record types as needed
+                }
 
                 // Check if the row for the current domain and record type already exists
                 DataGridViewRow existingRow = null;
@@ -129,14 +155,15 @@ namespace DNS_Simulation
 
                 if (existingRow != null)
                 {
-                    // Update the existing row with the new TTL value
+                    // Update the existing row with the new TTL and value
                     existingRow.Cells["TTL"].Value = initialTtl;
                     existingRow.Cells["TTD"].Value = formattedRemainingTtl;
+                    existingRow.Cells["Value"].Value = value;
                 }
                 else
                 {
                     // Add a new row to the recordGridView
-                    recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, ipAddress, type);
+                    recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
                 }
             }
         }
@@ -145,13 +172,13 @@ namespace DNS_Simulation
         {
             try
             {
-                TimeSpan ttl = TimeSpan.FromMinutes(1);
-                CustomMasterFile masterFile = new CustomMasterFile(ttl);
+                //TimeSpan ttl = TimeSpan.FromMinutes(1);
+                CustomMasterFile masterFile = new CustomMasterFile();
                 resolver = masterFile;
                 server = new DnsServer(masterFile, "8.8.8.8");
 
-                masterFile.AddIPAddressResourceRecord("google.com", "127.0.0.1");
-                masterFile.AddIPAddressResourceRecord("facebook.com", "127.0.0.1");
+                //masterFile.AddIPAddressResourceRecord("google.com", "127.0.0.1");
+                //masterFile.AddIPAddressResourceRecord("facebook.com", "127.0.0.1");
 
                 UpdateRecordGridView(masterFile);
 
@@ -168,10 +195,6 @@ namespace DNS_Simulation
 
                 server.Responded += async (sender, s) =>
                 {
-                    string domainName = s.Request.Questions[0].Name.ToString();
-                    string ipAddress = string.Empty;
-                    string type = s.Request.Questions[0].Type.ToString();
-
                     // Check if the requested record exists in the master file
                     IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
 
@@ -182,16 +205,6 @@ namespace DNS_Simulation
                         {
                             s.Response.AnswerRecords.Add(answer);
                         }
-                        
-                        // Extract the IP address from the first answer record
-                        if (answers[0] is IPAddressResourceRecord ipAddressRecord)
-                        {
-                            ipAddress = ipAddressRecord.IPAddress.ToString();
-                        }
-                        else if (answers[0] is PointerResourceRecord pointerRecord)
-                        {
-                            ipAddress = pointerRecord.PointerDomainName.ToString();
-                        }
                     }
                     else
                     {
@@ -201,10 +214,27 @@ namespace DNS_Simulation
                             await resolver.Resolve(s.Request);
                             if (s.Response.AnswerRecords.Count > 0)
                             {
-                                var responseIpAddress = new System.Net.IPAddress(s.Response.AnswerRecords[0].Data);
-                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {s.Response.AnswerRecords[0]} -> {responseIpAddress}")));
-                                masterFile.AddIPAddressResourceRecord(s.Request.Questions[0].Name.ToString(), responseIpAddress.ToString());
-                                ipAddress = responseIpAddress.ToString();
+                                var answer = s.Response.AnswerRecords[0];
+
+                                switch (answer)
+                                {
+                                    case IPAddressResourceRecord ipAddressRecord:
+                                        masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                        break;
+                                    case CanonicalNameResourceRecord cnameRecord:
+                                        masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                        break;
+                                    case MailExchangeResourceRecord mxRecord:
+                                        masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                        break;
+                                    case NameServerResourceRecord nsRecord:
+                                        masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                        break;
+                                    case TextResourceRecord txtRecord:
+                                        masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                        break;
+                                }
+                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {answer}")));
                             }
                             else
                             {
@@ -216,9 +246,6 @@ namespace DNS_Simulation
                             serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error resolving domain: {s.Request.Questions[0].Name}. {ex.Message}")));
                         }
                     }
-
-                    AddOrUpdateRecord(connection_Namespace, domainName, ipAddress, type);
-                    AddOrUpdateRecord(connection_Resolver, domainName, ipAddress, type);
 
                     recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
                 };
@@ -288,7 +315,7 @@ namespace DNS_Simulation
 
     public class CustomMasterFile : MasterFile
     {
-        public CustomMasterFile(TimeSpan ttl) : base(ttl) { }
+        public CustomMasterFile() : base() { }
 
         public new IList<IResourceRecord> Get(Domain domain, RecordType type)
         {

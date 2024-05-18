@@ -152,7 +152,7 @@
             // type
             // 
             type.FormattingEnabled = true;
-            type.Items.AddRange(new object[] { "PTR", "A", "AAAA", "CNAME", "ANY", "MX", "NS", "SOA" });
+            type.Items.AddRange(new object[] { "PTR", "A", "AAAA", "CNAME", "ANY", "MX", "NS", "TXT" });
             type.Location = new Point(350, 13);
             type.Name = "type";
             type.Size = new Size(151, 28);

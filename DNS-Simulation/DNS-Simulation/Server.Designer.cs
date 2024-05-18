@@ -39,6 +39,7 @@
             ttd = new DataGridViewTextBoxColumn();
             ipAddress = new DataGridViewTextBoxColumn();
             type = new DataGridViewTextBoxColumn();
+            value = new DataGridViewTextBoxColumn();
             serverLogGroup.SuspendLayout();
             dataGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)recordGridView).BeginInit();
@@ -102,7 +103,7 @@
             // recordGridView
             // 
             recordGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            recordGridView.Columns.AddRange(new DataGridViewColumn[] { domain, ttl, ttd, ipAddress, type });
+            recordGridView.Columns.AddRange(new DataGridViewColumn[] { domain, ttl, ttd, ipAddress, type, value });
             recordGridView.Location = new Point(6, 26);
             recordGridView.Name = "recordGridView";
             recordGridView.RowHeadersWidth = 51;
@@ -145,6 +146,13 @@
             type.Name = "type";
             type.Width = 125;
             // 
+            // value
+            // 
+            value.HeaderText = "Value";
+            value.MinimumWidth = 6;
+            value.Name = "value";
+            value.Width = 125;
+            // 
             // Server
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -173,5 +181,6 @@
         private DataGridViewTextBoxColumn ttd;
         private DataGridViewTextBoxColumn ipAddress;
         private DataGridViewTextBoxColumn type;
+        private DataGridViewTextBoxColumn value;
     }
 }
