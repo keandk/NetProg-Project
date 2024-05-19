@@ -30,7 +30,6 @@
         {
             serverLog = new ListBox();
             listenButton = new Button();
-            refreshButton = new Button();
             serverLogGroup = new GroupBox();
             dataGroup = new GroupBox();
             recordGridView = new DataGridView();
@@ -67,17 +66,6 @@
             listenButton.UseVisualStyleBackColor = false;
             listenButton.Click += listenButton_Click;
             // 
-            // refreshButton
-            // 
-            refreshButton.BackColor = SystemColors.ActiveCaption;
-            refreshButton.Location = new Point(347, 396);
-            refreshButton.Name = "refreshButton";
-            refreshButton.Size = new Size(94, 29);
-            refreshButton.TabIndex = 2;
-            refreshButton.Text = "Refresh";
-            refreshButton.UseVisualStyleBackColor = false;
-            refreshButton.Click += refreshButton_Click;
-            // 
             // serverLogGroup
             // 
             serverLogGroup.Controls.Add(serverLog);
@@ -92,7 +80,6 @@
             // dataGroup
             // 
             dataGroup.Controls.Add(recordGridView);
-            dataGroup.Controls.Add(refreshButton);
             dataGroup.Location = new Point(831, 12);
             dataGroup.Name = "dataGroup";
             dataGroup.Size = new Size(789, 456);
@@ -172,7 +159,6 @@
 
         private ListBox serverLog;
         private Button listenButton;
-        private Button refreshButton;
         private GroupBox serverLogGroup;
         private GroupBox dataGroup;
         private DataGridView recordGridView;

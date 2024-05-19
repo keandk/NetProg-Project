@@ -4,43 +4,43 @@ using System.Windows.Forms;
 using DNS.Client;
 using DNS.Protocol;
 using Ae.Dns.Client;
-using Ae.Dns.Metrics.InfluxDb;
 using Ae.Dns.Protocol;
 using Ae.Dns.Protocol.Enums;
-using Microsoft.Extensions.DependencyInjection;
-using Polly;
-using System.Diagnostics;
 using System.Net;
 using System.Runtime.Caching;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.TaskbarClock;
-using System.Net.Sockets;
 
 namespace DNS_Simulation
 {
     public partial class Client : Form
     {
-        private DnsCachingClient dnsCachingClient;
-        private DnsClient dnsClientForMessSize;
-        private UdpClient udpClient;
+        private DnsRacerClient dnsRacerClient;
+        //private DnsClient dnsClientForMessSize;
 
         public Client()
         {
             InitializeComponent();
 
-            var options = new DnsUdpClientOptions
+            var options1 = new DnsUdpClientOptions
             {
                 Endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080),
             };
 
-            var dnsClient = new DnsUdpClient(options);
+            var options2 = new DnsUdpClientOptions
+            {
+                Endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081),
+            };
 
-            dnsClientForMessSize = new DnsClient("127.0.0.1", 8080);
+            var dnsClient1 = new DnsUdpClient(options1);
+            var dnsClient2 = new DnsUdpClient(options2);
+
+            //dnsClientForMessSize = new DnsClient("127.0.0.1", 8080);
 
             var cache = new MemoryCache("DnsCache");
 
-            dnsCachingClient = new DnsCachingClient(dnsClient, cache);
+            var cachingClient1 = new DnsCachingClient(dnsClient1, cache);
+            var cachingClient2 = new DnsCachingClient(dnsClient2, cache);
+
+            dnsRacerClient = new DnsRacerClient(cachingClient1, cachingClient2);
         }
 
         private async void sendButton_Click(object sender, EventArgs e)
@@ -72,11 +72,11 @@ namespace DNS_Simulation
                     }
                 };
 
-                var response = await dnsCachingClient.Query(query, CancellationToken.None);
+                var response = await dnsRacerClient.Query(query, CancellationToken.None);
 
                 watch.Stop();
                 
-                IResponse response1 = await dnsClientForMessSize.Resolve(domainInput.Text, selectedRecordType);
+                //IResponse response1 = await dnsClientForMessSize.Resolve(domainInput.Text, selectedRecordType);
                 
                 var elapsedMs = watch.ElapsedMilliseconds;
                 string serverAddress = response.Answers.Last().ToString();
@@ -106,7 +106,7 @@ namespace DNS_Simulation
                 queryTime.Text = $"{elapsedMs} ms";
                 //server.Text = response.;
                 //MessageBox.Show(response.Answers.Last().ToString());
-                messageSize.Text = $"{response1.Size} bytes";
+                //messageSize.Text = $"{response1.Size} bytes";
             }
             catch (Exception ex)
             {

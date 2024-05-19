@@ -16,81 +16,13 @@ namespace DNS_Simulation
 {
     public partial class Server : Form
     {
-        private SQLiteConnection connection_Namespace;
-        private SQLiteConnection connection_Resolver;
-        private DnsServer server;
+        private DnsServer server1;
+        private DnsServer server2;
         private IRequestResolver resolver;
-        private UdpClient udp;
 
         public Server()
         {
             InitializeComponent();
-            InitializeDatabase();
-        }
-
-        private void InitializeDatabase()
-        {
-            try
-            {
-                string connectionString_Namespace = "Data Source=Data\\NameSpace.db;Version=3;";
-                connection_Namespace = new SQLiteConnection(connectionString_Namespace);
-                connection_Namespace.Open();
-
-                string connectionString_Resolver = "Data Source=Data\\Resolver.db;Version=3;";
-                connection_Resolver = new SQLiteConnection(connectionString_Resolver);
-                connection_Resolver.Open();
-
-                string createTableQuery = "CREATE TABLE IF NOT EXISTS DNSRecords (DomainName TEXT PRIMARY KEY, IPAddress TEXT, Type TEXT, Timestamp DATETIME DEFAULT CURRENT_TIMESTAMP)";
-
-                using (SQLiteCommand createTableCommand_Namespace = new SQLiteCommand(createTableQuery, connection_Namespace))
-                using (SQLiteCommand createTableCommand_Resolver = new SQLiteCommand(createTableQuery, connection_Resolver))
-                {
-                    createTableCommand_Namespace.ExecuteNonQuery();
-                    createTableCommand_Resolver.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error initializing database: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private void AddOrUpdateRecord(SQLiteConnection connection, string domainName, string ipAddress, string type)
-        {
-            try
-            {
-                string insertOrUpdateQuery = "INSERT OR REPLACE INTO DNSRecords (DomainName, IPAddress, Type) VALUES (@DomainName, @IPAddress, @Type)";
-                using (SQLiteCommand command = new SQLiteCommand(insertOrUpdateQuery, connection))
-                {
-                    command.Parameters.AddWithValue("@DomainName", domainName);
-                    command.Parameters.AddWithValue("@IPAddress", ipAddress);
-                    command.Parameters.AddWithValue("@Type", type);
-                    command.ExecuteNonQuery();
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error adding or updating record: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private string GetIPAddress(string domainName)
-        {
-            try
-            {
-                string selectQuery = "SELECT IPAddress FROM DNSRecords WHERE DomainName = @DomainName";
-                using (SQLiteCommand command = new SQLiteCommand(selectQuery, connection_Namespace))
-                {
-                    command.Parameters.AddWithValue("@DomainName", domainName);
-                    object result = command.ExecuteScalar();
-                    return result != null ? result.ToString() : null;
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error retrieving IP address: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return null;
-            }
         }
 
         private void UpdateRecordGridView(MasterFile masterFile)
@@ -136,10 +68,6 @@ namespace DNS_Simulation
                     case TextResourceRecord txtRecord:
                         value = txtRecord.ToStringTextData();
                         break;
-                    case ServiceResourceRecord srvRecord:
-                        value = $"{srvRecord.Priority} {srvRecord.Weight} {srvRecord.Port} {srvRecord.Target}";
-                        break;
-                        // Add more cases for other record types as needed
                 }
 
                 // Check if the row for the current domain and record type already exists
@@ -172,35 +100,42 @@ namespace DNS_Simulation
         {
             try
             {
-                //TimeSpan ttl = TimeSpan.FromMinutes(1);
                 CustomMasterFile masterFile = new CustomMasterFile();
                 resolver = masterFile;
-                server = new DnsServer(masterFile, "8.8.8.8");
 
-                //masterFile.AddIPAddressResourceRecord("google.com", "127.0.0.1");
-                //masterFile.AddIPAddressResourceRecord("facebook.com", "127.0.0.1");
+                server1 = new DnsServer(masterFile, "8.8.8.8");
+                server2 = new DnsServer(masterFile, "1.1.1.1");
 
                 UpdateRecordGridView(masterFile);
 
-                server.Requested += (s, args) =>
+                server1.Requested += (s, args) =>
                 {
                     var request = args.Request;
                     var remoteEndpoint = args.Remote;
 
                     serverLog.Invoke(new Action(() =>
                     {
-                        serverLog.Items.Add($"DNS request received from: {remoteEndpoint} for {request.Questions[0].Name}");
+                        serverLog.Items.Add($"DNS request received by Server 1 from: {remoteEndpoint} for {request.Questions[0].Name}");
                     }));
                 };
 
-                server.Responded += async (sender, s) =>
+                server2.Requested += (s, args) =>
                 {
-                    // Check if the requested record exists in the master file
+                    var request = args.Request;
+                    var remoteEndpoint = args.Remote;
+
+                    serverLog.Invoke(new Action(() =>
+                    {
+                        serverLog.Items.Add($"DNS request received by Server 2 from: {remoteEndpoint} for {request.Questions[0].Name}");
+                    }));
+                };
+
+                server1.Responded += async (sender, s) =>
+                {
                     IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
 
                     if (answers.Count > 0)
                     {
-                        // If the record exists, add the answers to the response
                         foreach (var answer in answers)
                         {
                             s.Response.AnswerRecords.Add(answer);
@@ -208,7 +143,6 @@ namespace DNS_Simulation
                     }
                     else
                     {
-                        // If the record does not exist, resolve it and add it to the master file
                         try
                         {
                             await resolver.Resolve(s.Request);
@@ -250,11 +184,72 @@ namespace DNS_Simulation
                     recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
                 };
 
-                server.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error: {s.Exception.Message}")));
-                server.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Listening...")));
+                server2.Responded += async (sender, s) =>
+                {
+                IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
+                if (answers.Count > 0)
+                {
+                    foreach (var answer in answers)
+                    {
+                        s.Response.AnswerRecords.Add(answer);
+                    }
+                }
+                else
+                {
+                    try
+                    {
+                        await resolver.Resolve(s.Request);
+                        if (s.Response.AnswerRecords.Count > 0)
+                        {
+                            var answer = s.Response.AnswerRecords[0];
+
+                            switch (answer)
+                                {
+                                    case IPAddressResourceRecord ipAddressRecord:
+                                        masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                        break;
+                                    case CanonicalNameResourceRecord cnameRecord:
+                                        masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                        break;
+                                    case MailExchangeResourceRecord mxRecord:
+                                        masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                        break;
+                                    case NameServerResourceRecord nsRecord:
+                                        masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                        break;
+                                    case TextResourceRecord txtRecord:
+                                        masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                        break;
+                                }
+                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {answer}")));
+                            }
+                            else
+                            {
+                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
+                            }
+                        }
+                        catch (Exception ex)
+                        {
+                            serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error resolving domain: {s.Request.Questions[0].Name}. {ex.Message}")));
+                        }
+                    }
+
+                    recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                };
+
+                server1.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 1: {s.Exception.Message}")));
+                server1.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 1 is listening...")));
+
+                server2.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
+                server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 2 is listening...")));
 
                 IPAddress ip = IPAddress.Parse("127.0.0.1");
-                await server.Listen(8080, ip);
+                Task listenTask1 = Task.Run(() => server1.Listen(8080, ip));
+                Task listenTask2 = Task.Run(() => server2.Listen(8081, ip));
+
+                // Wait for both tasks to complete
+                await Task.WhenAll(listenTask1, listenTask2);
             }
             catch (Exception ex)
             {
@@ -262,46 +257,11 @@ namespace DNS_Simulation
             }
         }
 
-        private void refreshButton_Click(object sender, EventArgs e)
-        {
-            DeleteExpiredRecords(connection_Namespace, 60, "Namespace");
-            DeleteExpiredRecords(connection_Resolver, 90, "Resolver");
-        }
-
-        private void DeleteExpiredRecords(SQLiteConnection connection, int expirationSeconds, string databaseName)
-        {
-            try
-            {
-                string deleteQuery = $"DELETE FROM DNSRecords WHERE strftime('%s', 'now') - strftime('%s', Timestamp) > {expirationSeconds};";
-                using (SQLiteCommand command = new SQLiteCommand(deleteQuery, connection))
-                {
-                    int deletedRows = command.ExecuteNonQuery();
-                    serverLog.Items.Add($"{deletedRows} {databaseName}'s records deleted.");
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error deleting expired records: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        private async Task<IResponse> Resolve(IRequest request)
-        {
-            try
-            {
-                return await resolver.Resolve(request);
-            }
-            catch (Exception ex)
-            {
-                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error resolving request: {ex.Message}")));
-                return Response.FromRequest(request);
-            }
-        }
-
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            server?.Dispose();
+            server1?.Dispose();
+            server2?.Dispose();
         }
     }
 
