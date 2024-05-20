@@ -41,8 +41,6 @@ namespace DNS_Simulation
             clearButton = new Button();
             label2 = new Label();
             type = new ComboBox();
-            label3 = new Label();
-            serverIpAddressInput = new TextBox();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
@@ -78,9 +76,9 @@ namespace DNS_Simulation
             responseBox.FormattingEnabled = true;
             responseBox.HorizontalScrollbar = true;
             responseBox.ItemHeight = 20;
-            responseBox.Location = new Point(20, 84);
+            responseBox.Location = new Point(20, 64);
             responseBox.Name = "responseBox";
-            responseBox.Size = new Size(768, 264);
+            responseBox.Size = new Size(768, 284);
             responseBox.TabIndex = 3;
             // 
             // groupBox1
@@ -161,22 +159,6 @@ namespace DNS_Simulation
             type.Size = new Size(151, 28);
             type.TabIndex = 7;
             // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(20, 49);
-            label3.Name = "label3";
-            label3.Size = new Size(114, 20);
-            label3.TabIndex = 0;
-            label3.Text = "Server's address";
-            // 
-            // serverIpAddressInput
-            // 
-            serverIpAddressInput.Location = new Point(140, 46);
-            serverIpAddressInput.Name = "serverIpAddressInput";
-            serverIpAddressInput.Size = new Size(194, 27);
-            serverIpAddressInput.TabIndex = 1;
-            // 
             // Client
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -188,8 +170,6 @@ namespace DNS_Simulation
             Controls.Add(groupBox1);
             Controls.Add(responseBox);
             Controls.Add(sendButton);
-            Controls.Add(serverIpAddressInput);
-            Controls.Add(label3);
             Controls.Add(domainInput);
             Controls.Add(label1);
             Name = "Client";
@@ -197,7 +177,7 @@ namespace DNS_Simulation
             groupBox1.ResumeLayout(false);
             groupBox1.PerformLayout();
             ResumeLayout(false);
-            PerformLayout();           
+            PerformLayout();
         }
 
         #endregion
@@ -214,7 +194,5 @@ namespace DNS_Simulation
         private Button clearButton;
         private Label label2;
         private ComboBox type;
-        private Label label3;
-        private TextBox serverIpAddressInput;
     }
 }

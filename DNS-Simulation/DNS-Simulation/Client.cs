@@ -13,72 +13,49 @@ namespace DNS_Simulation
 {
     public partial class Client : Form
     {
-        private DnsRacerClient dnsRacerClient;
-        private DnsUdpClient dnsClient1;
-        private DnsUdpClient dnsClient2;
-        private DnsCachingClient cachingClient1;
-        private DnsCachingClient cachingClient2;
-        private bool dnsClientsInitialized = false;
+        private DnsUdpClient dnsClient;
+        private DnsCachingClient cachingClient;
+        private bool dnsClientInitialized = false;
+        private LoadBalancer loadBalancer;
 
-        public Client()
+        public Client(LoadBalancer loadBalancer)
         {
             InitializeComponent();
+            this.loadBalancer = loadBalancer;
         }
 
-        private void InitializeDnsClients()
+        private void InitializeDnsClient()
         {
-            // Get the IP address from the text input
-            string ipAddress = serverIpAddressInput.Text;
-
-            if (string.IsNullOrWhiteSpace(ipAddress))
-            {
-                MessageBox.Show("Please enter a valid IP address.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            IPAddress parsedIpAddress;
-            if (!IPAddress.TryParse(ipAddress, out parsedIpAddress))
-            {
-                MessageBox.Show("Invalid IP address format.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
             try
             {
-                var options1 = new DnsUdpClientOptions
+                // Get the next server endpoint from the load balancer
+                IPEndPoint serverEndpoint = loadBalancer.GetNextServer();
+
+                var options = new DnsUdpClientOptions
                 {
-                    Endpoint = new IPEndPoint(parsedIpAddress, 8080),
+                    Endpoint = serverEndpoint,
                 };
 
-                var options2 = new DnsUdpClientOptions
-                {
-                    Endpoint = new IPEndPoint(parsedIpAddress, 8081),
-                };
-
-                dnsClient1 = new DnsUdpClient(options1);
-                dnsClient2 = new DnsUdpClient(options2);
+                dnsClient = new DnsUdpClient(options);
 
                 var cache = new MemoryCache("DnsCache");
 
-                cachingClient1 = new DnsCachingClient(dnsClient1, cache);
-                cachingClient2 = new DnsCachingClient(dnsClient2, cache);
+                cachingClient = new DnsCachingClient(dnsClient, cache);
 
-                dnsRacerClient = new DnsRacerClient(cachingClient1, cachingClient2);
-
-                dnsClientsInitialized = true;
+                dnsClientInitialized = true;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error initializing DNS clients: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show($"Error initializing DNS client: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void sendButton_Click(object sender, EventArgs e)
         {
-            if (!dnsClientsInitialized)
+            if (!dnsClientInitialized)
             {
-                InitializeDnsClients();
-                if (!dnsClientsInitialized)
+                InitializeDnsClient();
+                if (!dnsClientInitialized)
                 {
                     return;
                 }
@@ -111,7 +88,8 @@ namespace DNS_Simulation
                     }
                 };
 
-                var response = await dnsRacerClient.Query(query, CancellationToken.None);
+                var response = await cachingClient.Query(query, CancellationToken.None);
+                //var response = await loadBalancer.ResolveQuery(query);
 
                 watch.Stop();
 
