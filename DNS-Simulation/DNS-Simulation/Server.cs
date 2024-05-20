@@ -20,6 +20,7 @@ namespace DNS_Simulation
         private DnsServer server1;
         private DnsServer server2;
         private IRequestResolver resolver;
+        private RoundRobinLoadBalancer loadBalancer = new RoundRobinLoadBalancer();
 
         public Server()
         {
@@ -104,7 +105,7 @@ namespace DNS_Simulation
                 CustomMasterFile masterFile = new CustomMasterFile();
                 resolver = masterFile;
 
-                server1 = new DnsServer(masterFile, "8.8.8.8");
+                server1 = new DnsServer(masterFile, "1.1.1.1");
                 server2 = new DnsServer(masterFile, "1.1.1.1");
 
                 UpdateRecordGridView(masterFile);
@@ -117,20 +118,15 @@ namespace DNS_Simulation
                     var remoteEndpoint = args.Remote;
                     var requestDomain = request.Questions[0].Name.ToString();
 
-                    lock (requestsInProgress)
+                    int assignedServer = loadBalancer.GetNextServer(requestDomain);
+                    if (assignedServer == 0)
                     {
-                        if (requestsInProgress.ContainsKey(requestDomain))
+                        // Process the request on Server 1
+                        serverLog.Invoke(new Action(() =>
                         {
-                            // Request is already being processed by the other server, skip processing
-                            return;
-                        }
-                        requestsInProgress[requestDomain] = true;
+                            serverLog.Items.Add($"DNS request received by Server 1 from: {remoteEndpoint} for {request.Questions[0].Name}");
+                        }));
                     }
-
-                    serverLog.Invoke(new Action(() =>
-                    {
-                        serverLog.Items.Add($"DNS request received by Server 1 from: {remoteEndpoint} for {request.Questions[0].Name}");
-                    }));
                 };
 
                 server2.Requested += (s, args) =>
@@ -139,20 +135,15 @@ namespace DNS_Simulation
                     var remoteEndpoint = args.Remote;
                     var requestDomain = request.Questions[0].Name.ToString();
 
-                    lock (requestsInProgress)
+                    int assignedServer = loadBalancer.GetNextServer(requestDomain);
+                    if (assignedServer == 1)
                     {
-                        if (requestsInProgress.ContainsKey(requestDomain))
+                        // Process the request on Server 2
+                        serverLog.Invoke(new Action(() =>
                         {
-                            // Request is already being processed by the other server, skip processing
-                            return;
-                        }
-                        requestsInProgress[requestDomain] = true;
+                            serverLog.Items.Add($"DNS request received by Server 2 from: {remoteEndpoint} for {request.Questions[0].Name}");
+                        }));
                     }
-
-                    serverLog.Invoke(new Action(() =>
-                    {
-                        serverLog.Items.Add($"DNS request received by Server 2 from: {remoteEndpoint} for {request.Questions[0].Name}");
-                    }));
                 };
 
                 server1.Responded += async (sender, s) =>
@@ -206,10 +197,11 @@ namespace DNS_Simulation
                         }
                     }
 
-                    lock (requestsInProgress)
-                    {
-                        requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
-                    }
+                    //lock (requestsInProgress)
+                    //{
+                    //requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
+                    //}
+                    loadBalancer.RemoveRequest(s.Request.Questions[0].Name.ToString());
 
                     recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
                 };
@@ -265,10 +257,11 @@ namespace DNS_Simulation
                         }
                     }
 
-                    lock (requestsInProgress)
-                    {
-                        requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
-                    }
+                    //lock (requestsInProgress)
+                    //{
+                    //requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
+                    //}
+                    loadBalancer.RemoveRequest(s.Request.Questions[0].Name.ToString());
 
                     recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
                 };
@@ -288,8 +281,8 @@ namespace DNS_Simulation
                 if (localRadioButton.Checked)
                 {
                     IPAddress ip = IPAddress.Parse("127.0.0.1");
-                    Task listenTask1 = Task.Run(() => server1.Listen(8080, ip));
-                    Task listenTask2 = Task.Run(() => server2.Listen(8081, ip));
+                    Task listenTask1 = Task.Run(() => server1.Listen(8081, ip));
+                    Task listenTask2 = Task.Run(() => server2.Listen(8082, ip));
                     ipAddressLabel.Text = $"IP Address: {ip}";
                     // Wait for both tasks to complete
                     await Task.WhenAll(listenTask1, listenTask2);
@@ -341,6 +334,40 @@ namespace DNS_Simulation
         public new IList<IResourceRecord> Get(Domain domain, RecordType type)
         {
             return base.Get(domain, type);
+        }
+    }
+
+    public class RoundRobinLoadBalancer
+    {
+        private Dictionary<string, int> requestsInProgress = new Dictionary<string, int>();
+        private int currentServer = 0;
+
+        public int GetNextServer(string requestDomain)
+        {
+            lock (requestsInProgress)
+            {
+                if (requestsInProgress.ContainsKey(requestDomain))
+                {
+                    // Request is already being processed by a server, return the assigned server
+                    return requestsInProgress[requestDomain];
+                }
+                else
+                {
+                    // Assign the request to the next server in a round-robin manner
+                    int assignedServer = currentServer;
+                    currentServer = (currentServer + 1) % 2; // Assuming there are 2 servers (0 and 1)
+                    requestsInProgress[requestDomain] = assignedServer;
+                    return assignedServer;
+                }
+            }
+        }
+
+        public void RemoveRequest(string requestDomain)
+        {
+            lock (requestsInProgress)
+            {
+                requestsInProgress.Remove(requestDomain);
+            }
         }
     }
 }
