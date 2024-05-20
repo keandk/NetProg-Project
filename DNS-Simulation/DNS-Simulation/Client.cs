@@ -14,37 +14,76 @@ namespace DNS_Simulation
     public partial class Client : Form
     {
         private DnsRacerClient dnsRacerClient;
-        //private DnsClient dnsClientForMessSize;
+        private DnsUdpClient dnsClient1;
+        private DnsUdpClient dnsClient2;
+        private DnsCachingClient cachingClient1;
+        private DnsCachingClient cachingClient2;
+        private bool dnsClientsInitialized = false;
 
         public Client()
         {
             InitializeComponent();
+        }
 
-            var options1 = new DnsUdpClientOptions
+        private void InitializeDnsClients()
+        {
+            // Get the IP address from the text input
+            string ipAddress = serverIpAddressInput.Text;
+
+            if (string.IsNullOrWhiteSpace(ipAddress))
             {
-                Endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8080),
-            };
+                MessageBox.Show("Please enter a valid IP address.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            var options2 = new DnsUdpClientOptions
+            IPAddress parsedIpAddress;
+            if (!IPAddress.TryParse(ipAddress, out parsedIpAddress))
             {
-                Endpoint = new IPEndPoint(IPAddress.Parse("127.0.0.1"), 8081),
-            };
+                MessageBox.Show("Invalid IP address format.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return;
+            }
 
-            var dnsClient1 = new DnsUdpClient(options1);
-            var dnsClient2 = new DnsUdpClient(options2);
+            try
+            {
+                var options1 = new DnsUdpClientOptions
+                {
+                    Endpoint = new IPEndPoint(parsedIpAddress, 8080),
+                };
 
-            //dnsClientForMessSize = new DnsClient("127.0.0.1", 8080);
+                var options2 = new DnsUdpClientOptions
+                {
+                    Endpoint = new IPEndPoint(parsedIpAddress, 8081),
+                };
 
-            var cache = new MemoryCache("DnsCache");
+                dnsClient1 = new DnsUdpClient(options1);
+                dnsClient2 = new DnsUdpClient(options2);
 
-            var cachingClient1 = new DnsCachingClient(dnsClient1, cache);
-            var cachingClient2 = new DnsCachingClient(dnsClient2, cache);
+                var cache = new MemoryCache("DnsCache");
 
-            dnsRacerClient = new DnsRacerClient(cachingClient1, cachingClient2);
+                cachingClient1 = new DnsCachingClient(dnsClient1, cache);
+                cachingClient2 = new DnsCachingClient(dnsClient2, cache);
+
+                dnsRacerClient = new DnsRacerClient(cachingClient1, cachingClient2);
+
+                dnsClientsInitialized = true;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error initializing DNS clients: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         private async void sendButton_Click(object sender, EventArgs e)
         {
+            if (!dnsClientsInitialized)
+            {
+                InitializeDnsClients();
+                if (!dnsClientsInitialized)
+                {
+                    return;
+                }
+            }
+
             string time = DateTime.Now.ToString();
             when.Text = time;
             queryTime.Text = "";
@@ -75,9 +114,7 @@ namespace DNS_Simulation
                 var response = await dnsRacerClient.Query(query, CancellationToken.None);
 
                 watch.Stop();
-                
-                //IResponse response1 = await dnsClientForMessSize.Resolve(domainInput.Text, selectedRecordType);
-                
+
                 var elapsedMs = watch.ElapsedMilliseconds;
                 string serverAddress = response.Answers.Last().ToString();
                 int startIndex = serverAddress.IndexOf("Resource: ") + "Resource: ".Length;
@@ -104,13 +141,10 @@ namespace DNS_Simulation
                 }
 
                 queryTime.Text = $"{elapsedMs} ms";
-                //server.Text = response.;
-                //MessageBox.Show(response.Answers.Last().ToString());
-                //messageSize.Text = $"{response1.Size} bytes";
             }
             catch (Exception ex)
             {
-                responseBox.Items.Add(time);
+                responseBox.Items.Add(DateTime.Now.ToString());
                 responseBox.Items.Add($"Error: {ex.Message}");
                 responseBox.Items.Add("-------------------------");
             }

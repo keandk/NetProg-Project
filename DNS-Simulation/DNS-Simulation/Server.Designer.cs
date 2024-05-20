@@ -31,6 +31,9 @@
             serverLog = new ListBox();
             listenButton = new Button();
             serverLogGroup = new GroupBox();
+            ipAddressLabel = new Label();
+            lanRadioButton = new RadioButton();
+            localRadioButton = new RadioButton();
             dataGroup = new GroupBox();
             recordGridView = new DataGridView();
             domain = new DataGridViewTextBoxColumn();
@@ -68,6 +71,9 @@
             // 
             // serverLogGroup
             // 
+            serverLogGroup.Controls.Add(ipAddressLabel);
+            serverLogGroup.Controls.Add(lanRadioButton);
+            serverLogGroup.Controls.Add(localRadioButton);
             serverLogGroup.Controls.Add(serverLog);
             serverLogGroup.Controls.Add(listenButton);
             serverLogGroup.Location = new Point(12, 12);
@@ -76,6 +82,37 @@
             serverLogGroup.TabIndex = 3;
             serverLogGroup.TabStop = false;
             serverLogGroup.Text = "Server Log";
+            // 
+            // ipAddressLabel
+            // 
+            ipAddressLabel.AutoSize = true;
+            ipAddressLabel.Location = new Point(471, 400);
+            ipAddressLabel.Name = "ipAddressLabel";
+            ipAddressLabel.Size = new Size(85, 20);
+            ipAddressLabel.TabIndex = 3;
+            ipAddressLabel.Text = "IP Address: ";
+            // 
+            // lanRadioButton
+            // 
+            lanRadioButton.AutoSize = true;
+            lanRadioButton.Location = new Point(205, 422);
+            lanRadioButton.Name = "lanRadioButton";
+            lanRadioButton.Size = new Size(58, 24);
+            lanRadioButton.TabIndex = 2;
+            lanRadioButton.TabStop = true;
+            lanRadioButton.Text = "LAN";
+            lanRadioButton.UseVisualStyleBackColor = true;
+            // 
+            // localRadioButton
+            // 
+            localRadioButton.AutoSize = true;
+            localRadioButton.Location = new Point(205, 385);
+            localRadioButton.Name = "localRadioButton";
+            localRadioButton.Size = new Size(65, 24);
+            localRadioButton.TabIndex = 2;
+            localRadioButton.TabStop = true;
+            localRadioButton.Text = "Local";
+            localRadioButton.UseVisualStyleBackColor = true;
             // 
             // dataGroup
             // 
@@ -150,6 +187,7 @@
             Name = "Server";
             Text = "Server";
             serverLogGroup.ResumeLayout(false);
+            serverLogGroup.PerformLayout();
             dataGroup.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)recordGridView).EndInit();
             ResumeLayout(false);
@@ -168,5 +206,8 @@
         private DataGridViewTextBoxColumn ipAddress;
         private DataGridViewTextBoxColumn type;
         private DataGridViewTextBoxColumn value;
+        private RadioButton localRadioButton;
+        private RadioButton lanRadioButton;
+        private Label ipAddressLabel;
     }
 }

@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using DNS.Client.RequestResolver;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Net.NetworkInformation;
 
 namespace DNS_Simulation
 {
@@ -108,10 +109,23 @@ namespace DNS_Simulation
 
                 UpdateRecordGridView(masterFile);
 
+                Dictionary<string, bool> requestsInProgress = new Dictionary<string, bool>();
+
                 server1.Requested += (s, args) =>
                 {
                     var request = args.Request;
                     var remoteEndpoint = args.Remote;
+                    var requestDomain = request.Questions[0].Name.ToString();
+
+                    lock (requestsInProgress)
+                    {
+                        if (requestsInProgress.ContainsKey(requestDomain))
+                        {
+                            // Request is already being processed by the other server, skip processing
+                            return;
+                        }
+                        requestsInProgress[requestDomain] = true;
+                    }
 
                     serverLog.Invoke(new Action(() =>
                     {
@@ -123,6 +137,17 @@ namespace DNS_Simulation
                 {
                     var request = args.Request;
                     var remoteEndpoint = args.Remote;
+                    var requestDomain = request.Questions[0].Name.ToString();
+
+                    lock (requestsInProgress)
+                    {
+                        if (requestsInProgress.ContainsKey(requestDomain))
+                        {
+                            // Request is already being processed by the other server, skip processing
+                            return;
+                        }
+                        requestsInProgress[requestDomain] = true;
+                    }
 
                     serverLog.Invoke(new Action(() =>
                     {
@@ -181,30 +206,35 @@ namespace DNS_Simulation
                         }
                     }
 
+                    lock (requestsInProgress)
+                    {
+                        requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
+                    }
+
                     recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
                 };
 
                 server2.Responded += async (sender, s) =>
                 {
-                IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+                    IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
 
-                if (answers.Count > 0)
-                {
-                    foreach (var answer in answers)
+                    if (answers.Count > 0)
                     {
-                        s.Response.AnswerRecords.Add(answer);
-                    }
-                }
-                else
-                {
-                    try
-                    {
-                        await resolver.Resolve(s.Request);
-                        if (s.Response.AnswerRecords.Count > 0)
+                        foreach (var answer in answers)
                         {
-                            var answer = s.Response.AnswerRecords[0];
+                            s.Response.AnswerRecords.Add(answer);
+                        }
+                    }
+                    else
+                    {
+                        try
+                        {
+                            await resolver.Resolve(s.Request);
+                            if (s.Response.AnswerRecords.Count > 0)
+                            {
+                                var answer = s.Response.AnswerRecords[0];
 
-                            switch (answer)
+                                switch (answer)
                                 {
                                     case IPAddressResourceRecord ipAddressRecord:
                                         masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
@@ -235,6 +265,11 @@ namespace DNS_Simulation
                         }
                     }
 
+                    lock (requestsInProgress)
+                    {
+                        requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
+                    }
+
                     recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
                 };
 
@@ -244,12 +279,38 @@ namespace DNS_Simulation
                 server2.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
                 server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 2 is listening...")));
 
-                IPAddress ip = IPAddress.Parse("127.0.0.1");
-                Task listenTask1 = Task.Run(() => server1.Listen(8080, ip));
-                Task listenTask2 = Task.Run(() => server2.Listen(8081, ip));
+                var ipAddresses = NetworkInterface.GetAllNetworkInterfaces()
+                                                    .Where(n => n.OperationalStatus == OperationalStatus.Up)
+                                                    .SelectMany(n => n.GetIPProperties().UnicastAddresses)
+                                                    .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
+                                                    .Select(a => a.Address)
+                                                    .ToList();
+                if (localRadioButton.Checked)
+                {
+                    IPAddress ip = IPAddress.Parse("127.0.0.1");
+                    Task listenTask1 = Task.Run(() => server1.Listen(8080, ip));
+                    Task listenTask2 = Task.Run(() => server2.Listen(8081, ip));
+                    ipAddressLabel.Text = $"IP Address: {ip}";
+                    // Wait for both tasks to complete
+                    await Task.WhenAll(listenTask1, listenTask2);
+                }
+                else if (lanRadioButton.Checked && ipAddresses.Count > 0)
+                {
+                    // Use the first available IP address
+                    IPAddress serverIpAddress = ipAddresses[0];
 
-                // Wait for both tasks to complete
-                await Task.WhenAll(listenTask1, listenTask2);
+                    // Create separate tasks for each Listen operation
+                    Task listenTask1 = Task.Run(() => server1.Listen(8080, serverIpAddress));
+                    Task listenTask2 = Task.Run(() => server2.Listen(8081, serverIpAddress));
+                    ipAddressLabel.Text = $"IP Address: {serverIpAddress}";
+
+                    // Wait for both tasks to complete
+                    await Task.WhenAll(listenTask1, listenTask2);
+                }
+                else
+                {
+                    MessageBox.Show("No available IP addresses found for LAN mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
             }
             catch (Exception ex)
             {
