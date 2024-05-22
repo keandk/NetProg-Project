@@ -41,5 +41,25 @@ namespace DNS_Simulation
                 return response;
             }
         }
+
+        public async Task StartAsync(IPAddress ipAddress, int port)
+        {
+            var endpoint = new IPEndPoint(ipAddress, port);
+            using (var udpClient = new UdpClient(endpoint))
+            {
+                _ = udpClient.ReceiveAsync().ContinueWith(async (t) =>
+                {
+                    if (t.IsCompletedSuccessfully)
+                    {
+                        var result = t.Result;
+                        var serverEndpoint = GetNextServer();
+                        await udpClient.SendAsync(result.Buffer, result.Buffer.Length, serverEndpoint);
+
+                        // Recursively call ReceiveAsync to handle the next packet
+                        await StartAsync(ipAddress, port);
+                    }
+                });
+            }
+        }
     }
 }

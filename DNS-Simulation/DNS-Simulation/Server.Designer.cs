@@ -42,6 +42,7 @@
             ipAddress = new DataGridViewTextBoxColumn();
             type = new DataGridViewTextBoxColumn();
             value = new DataGridViewTextBoxColumn();
+            newClient = new Button();
             serverLogGroup.SuspendLayout();
             dataGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)recordGridView).BeginInit();
@@ -61,7 +62,7 @@
             // listenButton
             // 
             listenButton.BackColor = SystemColors.ActiveCaption;
-            listenButton.Location = new Point(347, 396);
+            listenButton.Location = new Point(149, 393);
             listenButton.Name = "listenButton";
             listenButton.Size = new Size(94, 29);
             listenButton.TabIndex = 1;
@@ -71,6 +72,7 @@
             // 
             // serverLogGroup
             // 
+            serverLogGroup.Controls.Add(newClient);
             serverLogGroup.Controls.Add(ipAddressLabel);
             serverLogGroup.Controls.Add(lanRadioButton);
             serverLogGroup.Controls.Add(localRadioButton);
@@ -86,7 +88,7 @@
             // ipAddressLabel
             // 
             ipAddressLabel.AutoSize = true;
-            ipAddressLabel.Location = new Point(471, 400);
+            ipAddressLabel.Location = new Point(273, 397);
             ipAddressLabel.Name = "ipAddressLabel";
             ipAddressLabel.Size = new Size(85, 20);
             ipAddressLabel.TabIndex = 3;
@@ -95,7 +97,7 @@
             // lanRadioButton
             // 
             lanRadioButton.AutoSize = true;
-            lanRadioButton.Location = new Point(205, 422);
+            lanRadioButton.Location = new Point(7, 419);
             lanRadioButton.Name = "lanRadioButton";
             lanRadioButton.Size = new Size(58, 24);
             lanRadioButton.TabIndex = 2;
@@ -106,7 +108,7 @@
             // localRadioButton
             // 
             localRadioButton.AutoSize = true;
-            localRadioButton.Location = new Point(205, 385);
+            localRadioButton.Location = new Point(7, 382);
             localRadioButton.Name = "localRadioButton";
             localRadioButton.Size = new Size(65, 24);
             localRadioButton.TabIndex = 2;
@@ -177,6 +179,17 @@
             value.Name = "value";
             value.Width = 125;
             // 
+            // newClient
+            // 
+            newClient.BackColor = SystemColors.ActiveCaption;
+            newClient.Location = new Point(689, 393);
+            newClient.Name = "newClient";
+            newClient.Size = new Size(94, 29);
+            newClient.TabIndex = 4;
+            newClient.Text = "New Client";
+            newClient.UseVisualStyleBackColor = false;
+            newClient.Click += newClient_Click;
+            // 
             // Server
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
@@ -209,5 +222,6 @@
         private RadioButton localRadioButton;
         private RadioButton lanRadioButton;
         private Label ipAddressLabel;
+        private Button newClient;
     }
 }

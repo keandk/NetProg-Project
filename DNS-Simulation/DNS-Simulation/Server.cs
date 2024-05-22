@@ -31,7 +31,7 @@ namespace DNS_Simulation
         {
             recordGridView.Rows.Clear();
 
-            // Use reflection to access the protected 'entries' field
+            // Sử dụng reflection để truy cập trường 'entries' được bảo vệ
             FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
             IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
 
@@ -40,11 +40,11 @@ namespace DNS_Simulation
                 string domain = entry.Name.ToString();
                 string initialTtl = entry.TimeToLive.ToString();
 
-                // Calculate the remaining TTL based on the current time and the timestamp when the record was added
+                // Tính toán TTL còn lại dựa trên thời gian hiện tại và timestamp khi bản ghi được thêm
                 TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
                 TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
 
-                // Format the remaining TTL as a string (e.g., "mm:ss")
+                // Định dạng TTL còn lại dưới dạng chuỗi (e.g., "mm:ss")
                 string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
 
                 string value = string.Empty;
@@ -174,27 +174,30 @@ namespace DNS_Simulation
                             await resolver.Resolve(s.Request);
                             if (s.Response.AnswerRecords.Count > 0)
                             {
-                                var answer = s.Response.AnswerRecords[0];
-
-                                switch (answer)
+                                foreach (var response in s.Response.AnswerRecords)
                                 {
-                                    case IPAddressResourceRecord ipAddressRecord:
-                                        masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
-                                        break;
-                                    case CanonicalNameResourceRecord cnameRecord:
-                                        masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
-                                        break;
-                                    case MailExchangeResourceRecord mxRecord:
-                                        masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
-                                        break;
-                                    case NameServerResourceRecord nsRecord:
-                                        masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
-                                        break;
-                                    case TextResourceRecord txtRecord:
-                                        masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
-                                        break;
+                                    switch (response)
+                                    {
+                                        case IPAddressResourceRecord ipAddressRecord:
+                                            masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                            break;
+                                        case CanonicalNameResourceRecord cnameRecord:
+                                            masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                            break;
+                                        case MailExchangeResourceRecord mxRecord:
+                                            masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                            break;
+                                        case NameServerResourceRecord nsRecord:
+                                            masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                            break;
+                                        case TextResourceRecord txtRecord:
+                                            masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                            break;
+                                    }
+
+                                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response}")));
                                 }
-                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {answer}")));
+                                //var answer = s.Response.AnswerRecords[0];
                             }
                             else
                             {
@@ -233,27 +236,31 @@ namespace DNS_Simulation
                             await resolver.Resolve(s.Request);
                             if (s.Response.AnswerRecords.Count > 0)
                             {
-                                var answer = s.Response.AnswerRecords[0];
-
-                                switch (answer)
+                                foreach (var response in s.Response.AnswerRecords)
                                 {
-                                    case IPAddressResourceRecord ipAddressRecord:
-                                        masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
-                                        break;
-                                    case CanonicalNameResourceRecord cnameRecord:
-                                        masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
-                                        break;
-                                    case MailExchangeResourceRecord mxRecord:
-                                        masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
-                                        break;
-                                    case NameServerResourceRecord nsRecord:
-                                        masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
-                                        break;
-                                    case TextResourceRecord txtRecord:
-                                        masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
-                                        break;
+                                    switch (response)
+                                    {
+                                        case IPAddressResourceRecord ipAddressRecord:
+                                            masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                            break;
+                                        case CanonicalNameResourceRecord cnameRecord:
+                                            masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                            break;
+                                        case MailExchangeResourceRecord mxRecord:
+                                            masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                            break;
+                                        case NameServerResourceRecord nsRecord:
+                                            masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                            break;
+                                        case TextResourceRecord txtRecord:
+                                            masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                            break;
+                                    }
+
+                                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response}")));
                                 }
-                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {answer}")));
+                                //var answer = s.Response.AnswerRecords[0];
+
                             }
                             else
                             {
@@ -280,12 +287,12 @@ namespace DNS_Simulation
                 server2.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
                 server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 2 is listening...")));
 
-                var ipAddresses = NetworkInterface.GetAllNetworkInterfaces()
-                                                    .Where(n => n.OperationalStatus == OperationalStatus.Up)
-                                                    .SelectMany(n => n.GetIPProperties().UnicastAddresses)
-                                                    .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
-                                                    .Select(a => a.Address)
-                                                    .ToList();
+                //var ipAddresses = NetworkInterface.GetAllNetworkInterfaces()
+                //                                    .Where(n => n.OperationalStatus == OperationalStatus.Up)
+                //                                    .SelectMany(n => n.GetIPProperties().UnicastAddresses)
+                //                                    .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
+                //                                    .Select(a => a.Address)
+                //                                    .ToList();
                 //if (localRadioButton.Checked)
                 //{
                 //    IPAddress ip = IPAddress.Parse("127.0.0.1");
@@ -313,20 +320,21 @@ namespace DNS_Simulation
                 //    MessageBox.Show("No available IP addresses found for LAN mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 //}
 
+                // Define the server endpoints
                 List<IPEndPoint> serverEndpoints = new();
 
                 if (localRadioButton.Checked)
                 {
                     IPAddress ip = IPAddress.Parse("127.0.0.1");
-                    serverEndpoints.Add(new IPEndPoint(ip, 8080));
                     serverEndpoints.Add(new IPEndPoint(ip, 8081));
+                    serverEndpoints.Add(new IPEndPoint(ip, 8082));
                     ipAddressLabel.Text = $"IP Address: {ip}";
                 }
-                else if (lanRadioButton.Checked && ipAddresses.Count > 0)
+                else if (lanRadioButton.Checked)
                 {
-                    IPAddress serverIpAddress = ipAddresses[0];
-                    serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8080));
+                    IPAddress serverIpAddress = IPAddress.Parse("127.0.2.2");
                     serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8081));
+                    serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8082));
                     ipAddressLabel.Text = $"IP Address: {serverIpAddress}";
                 }
                 else
@@ -338,32 +346,55 @@ namespace DNS_Simulation
                 // Initialize the load balancer with server endpoints
                 loadBalancer = new LoadBalancer(serverEndpoints);
 
-                // Open the Client form and pass the load balancer instance
-                Client clientForm1 = new(loadBalancer);
-                Client clientForm2 = new(loadBalancer);
-                Client clientForm3 = new(loadBalancer);
-
-
-                clientForm1.Show();
-                clientForm2.Show();
-                //clientForm3.Show();
-
-
+                // Start the load balancer
+                IPAddress loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : IPAddress.Parse("127.0.2.2");
+                int loadBalancerPort = 8080;
+                await loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort);
 
                 // Start listening on the server endpoints
                 if (localRadioButton.Checked)
                 {
                     IPAddress ip = IPAddress.Parse("127.0.0.1");
-                    Task listenTask1 = Task.Run(() => server1.Listen(8080, ip));
-                    Task listenTask2 = Task.Run(() => server2.Listen(8081, ip));
-                    await Task.WhenAll(listenTask1, listenTask2);
+                    Task listenTask1 = Task.Run(() => server1.Listen(8081, ip));
+                    Task listenTask2 = Task.Run(() => server2.Listen(8082, ip));
+                    // Wait for a maximum of 5 seconds
+                    bool tasksCompleted = Task.WaitAll(new[] { listenTask1, listenTask2 }, TimeSpan.FromSeconds(5));
+
+                    if (tasksCompleted)
+                    {
+                        // Tasks completed successfully
+                        MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Tasks did not complete within the specified timeout
+                        MessageBox.Show("Failed to start the servers.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
-                else if (lanRadioButton.Checked && ipAddresses.Count > 0)
+                else if (lanRadioButton.Checked)
                 {
-                    IPAddress serverIpAddress = ipAddresses[0];
-                    Task listenTask1 = Task.Run(() => server1.Listen(8080, serverIpAddress));
-                    Task listenTask2 = Task.Run(() => server2.Listen(8081, serverIpAddress));
-                    await Task.WhenAll(listenTask1, listenTask2);
+                    IPAddress serverIpAddress = IPAddress.Parse("127.0.2.2");
+                    Task listenTask1 = Task.Run(() => server1.Listen(8081, serverIpAddress));
+                    Task listenTask2 = Task.Run(() => server2.Listen(8082, serverIpAddress));
+                    // Wait for a maximum of 5 seconds
+                    bool tasksCompleted = Task.WaitAll(new[] { listenTask1, listenTask2 }, TimeSpan.FromSeconds(5));
+
+                    if (tasksCompleted)
+                    {
+                        // Tasks completed successfully
+                        MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        // Tasks did not complete within the specified timeout
+                        MessageBox.Show("Failed to start the servers.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else
+                {
+                    MessageBox.Show("No available IP addresses found for LAN mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
             catch (Exception ex)
@@ -377,6 +408,12 @@ namespace DNS_Simulation
             base.OnFormClosing(e);
             server1?.Dispose();
             server2?.Dispose();
+        }
+
+        private void newClient_Click(object sender, EventArgs e)
+        {
+            Client clientForm = new();
+            clientForm.Show();
         }
     }
 

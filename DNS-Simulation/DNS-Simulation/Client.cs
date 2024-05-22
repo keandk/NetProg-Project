@@ -16,24 +16,27 @@ namespace DNS_Simulation
         private DnsUdpClient dnsClient;
         private DnsCachingClient cachingClient;
         private bool dnsClientInitialized = false;
-        private LoadBalancer loadBalancer;
+        private IPEndPoint loadBalancerEndpoint;
 
-        public Client(LoadBalancer loadBalancer)
+        public Client()
         {
             InitializeComponent();
-            this.loadBalancer = loadBalancer;
+            type.SelectedIndex = 0;
         }
 
         private void InitializeDnsClient()
         {
             try
             {
-                // Get the next server endpoint from the load balancer
-                IPEndPoint serverEndpoint = loadBalancer.GetNextServer();
+                // Prompt the user to enter the IP address and port of the load balancer
+                string loadBalancerIp = loadBalancerIpAddressTextBox.Text;
+                int loadBalancerPort = int.Parse(loadBalancerPortTextBox.Text);
+
+                loadBalancerEndpoint = new IPEndPoint(IPAddress.Parse(loadBalancerIp), loadBalancerPort);
 
                 var options = new DnsUdpClientOptions
                 {
-                    Endpoint = serverEndpoint,
+                    Endpoint = loadBalancerEndpoint,
                 };
 
                 dnsClient = new DnsUdpClient(options);
@@ -89,7 +92,6 @@ namespace DNS_Simulation
                 };
 
                 var response = await cachingClient.Query(query, CancellationToken.None);
-                //var response = await loadBalancer.ResolveQuery(query);
 
                 watch.Stop();
 
