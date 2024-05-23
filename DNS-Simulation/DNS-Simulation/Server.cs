@@ -72,31 +72,11 @@ namespace DNS_Simulation
                         break;
                 }
 
-                // Check if the row for the current domain and record type already exists
-                DataGridViewRow existingRow = null;
-                foreach (DataGridViewRow row in recordGridView.Rows)
-                {
-                    if (row.Cells["Domain"].Value?.ToString() == domain && row.Cells["Type"].Value?.ToString() == type)
-                    {
-                        existingRow = row;
-                        break;
-                    }
-                }
-
-                if (existingRow != null)
-                {
-                    // Update the existing row with the new TTL and value
-                    existingRow.Cells["TTL"].Value = initialTtl;
-                    existingRow.Cells["TTD"].Value = formattedRemainingTtl;
-                    existingRow.Cells["Value"].Value = value;
-                }
-                else
-                {
-                    // Add a new row to the recordGridView
-                    recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
-                }
+                // Add a new row to the recordGridView
+                recordGridView.Rows.Add(Guid.NewGuid().ToString(), domain, initialTtl, formattedRemainingTtl, value, type);
             }
         }
+
 
         private async void listenButton_Click(object sender, EventArgs e)
         {
