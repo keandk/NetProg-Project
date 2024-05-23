@@ -270,19 +270,27 @@ namespace DNS_Simulation
                 // Define the server endpoints
                 List<IPEndPoint> serverEndpoints = new();
 
+                IPAddress? serverIpAddress = GetLocalIPAddress();
                 if (localRadioButton.Checked)
                 {
                     IPAddress ip = IPAddress.Parse("127.0.0.1");
                     serverEndpoints.Add(new IPEndPoint(ip, 8081));
                     serverEndpoints.Add(new IPEndPoint(ip, 8082));
-                    ipAddressLabel.Text = $"IP Address: {ip}";
+                    ipAddressLabel.Text = $"Load Balancer: {ip}:8080";
                 }
                 else if (lanRadioButton.Checked)
                 {
-                    IPAddress serverIpAddress = IPAddress.Parse("127.0.2.2");
-                    serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8081));
-                    serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8082));
-                    ipAddressLabel.Text = $"IP Address: {serverIpAddress}";
+                    if (serverIpAddress != null)
+                    {
+                        serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8081));
+                        serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8082));
+                        ipAddressLabel.Text = $"Load Balancer: {serverIpAddress}:8080";
+                    }
+                    else
+                    {
+                        MessageBox.Show("No available IP addresses found for LAN mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        return;
+                    }
                 }
                 else
                 {
@@ -294,7 +302,7 @@ namespace DNS_Simulation
                 loadBalancer = new LoadBalancer(serverEndpoints);
 
                 // Start the load balancer asynchronously
-                IPAddress loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : IPAddress.Parse("127.0.2.2");
+                IPAddress? loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddress;
                 int loadBalancerPort = 8080;
                 Task loadBalancerTask = Task.Run(() => loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort));
 
@@ -313,14 +321,21 @@ namespace DNS_Simulation
             }
         }
 
-        private static IPAddress GetLocalIPAddress()
+        private static IPAddress? GetLocalIPAddress()
         {
-            var host = Dns.GetHostEntry(Dns.GetHostName());
-            foreach (var ip in host.AddressList)
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+            foreach (var iface in interfaces)
             {
-                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                if (iface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && iface.OperationalStatus == OperationalStatus.Up)
                 {
-                    return ip;
+                    var ipProps = iface.GetIPProperties();
+                    foreach (var addr in ipProps.UnicastAddresses)
+                    {
+                        if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            return addr.Address;
+                        }
+                    }
                 }
             }
             return null;
