@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Windows.Forms;
-using DNS.Client;
-using DNS.Protocol;
+﻿using DNS.Protocol;
 using Ae.Dns.Client;
 using Ae.Dns.Protocol;
 using Ae.Dns.Protocol.Enums;
@@ -28,11 +24,20 @@ namespace DNS_Simulation
         {
             try
             {
-                // Prompt the user to enter the IP address and port of the load balancer
-                string loadBalancerIp = loadBalancerIpAddressTextBox.Text;
-                int loadBalancerPort = int.Parse(loadBalancerPortTextBox.Text);
+                // Validate the IP address and port entered by the user
+                if (!IPAddress.TryParse(loadBalancerIpAddressTextBox.Text, out IPAddress loadBalancerIp))
+                {
+                    MessageBox.Show("Invalid IP address format.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
 
-                loadBalancerEndpoint = new IPEndPoint(IPAddress.Parse(loadBalancerIp), loadBalancerPort);
+                if (!int.TryParse(loadBalancerPortTextBox.Text, out int loadBalancerPort))
+                {
+                    MessageBox.Show("Invalid port number format.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
+                loadBalancerEndpoint = new IPEndPoint(loadBalancerIp, loadBalancerPort);
 
                 var options = new DnsUdpClientOptions
                 {
@@ -50,30 +55,46 @@ namespace DNS_Simulation
             catch (Exception ex)
             {
                 MessageBox.Show($"Error initializing DNS client: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                dnsClientInitialized = false;
+            }
+        }
+
+        private void connectButton_Click(object sender, EventArgs e)
+        {
+            if (!dnsClientInitialized)
+            {
+                InitializeDnsClient();
+            }
+
+            if (dnsClientInitialized)
+            {
+                loadBalancerLabel.Text = $"Connected to {loadBalancerIpAddressTextBox.Text} at port {loadBalancerPortTextBox.Text}";
+            }
+            else
+            {
+                loadBalancerLabel.Text = "Not Connected";
+                MessageBox.Show("Failed to connect to the DNS server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
         private async void sendButton_Click(object sender, EventArgs e)
         {
-            if (!dnsClientInitialized)
-            {
-                InitializeDnsClient();
-                if (!dnsClientInitialized)
-                {
-                    return;
-                }
-            }
-
             string time = DateTime.Now.ToString();
             when.Text = time;
             queryTime.Text = "";
             server.Text = "";
-            messageSize.Text = "";
 
             RecordType selectedRecordType = (RecordType)Enum.Parse(typeof(RecordType), type.SelectedItem.ToString());
 
             try
             {
+                // Validate the domain input
+                if (string.IsNullOrWhiteSpace(domainInput.Text))
+                {
+                    MessageBox.Show("Please enter a valid domain name.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+
                 var watch = System.Diagnostics.Stopwatch.StartNew();
 
                 var query = new DnsMessage
@@ -96,27 +117,32 @@ namespace DNS_Simulation
                 watch.Stop();
 
                 var elapsedMs = watch.ElapsedMilliseconds;
-                string serverAddress = response.Answers.Last().ToString();
-                int startIndex = serverAddress.IndexOf("Resource: ") + "Resource: ".Length;
-                int endIndex = serverAddress.IndexOf(Environment.NewLine, startIndex);
-                if (startIndex > 0 && endIndex > 0)
+                string serverAddress = response.Answers.LastOrDefault()?.ToString();
+                if (!string.IsNullOrEmpty(serverAddress))
                 {
-                    serverAddress = serverAddress.Substring(startIndex, endIndex - startIndex).Trim();
+                    int startIndex = serverAddress.IndexOf("Resource: ") + "Resource: ".Length;
+                    int endIndex = serverAddress.IndexOf(Environment.NewLine, startIndex);
+                    if (startIndex > 0 && endIndex > 0)
+                    {
+                        serverAddress = serverAddress.Substring(startIndex, endIndex - startIndex).Trim();
+                    }
                 }
 
-                for (int i = 0; i < response.Answers.Count; i++)
+                if (response.Answers.Count > 0)
                 {
-                    responseBox.Items.Add(time);
-                    responseBox.Items.Add(response.Answers[i].ToString());
-                    responseBox.Items.Add("-------------------------");
-                    server.Text = serverAddress;
+                    for (int i = 0; i < response.Answers.Count; i++)
+                    {
+                        responseBox.Items.Add(time);
+                        responseBox.Items.Add(response.Answers[i].ToString());
+                        responseBox.Items.Add("-------------------------");
+                        server.Text = serverAddress;
+                    }
                 }
-                if (response.Answers.Count == 0)
+                else
                 {
                     responseBox.Items.Add(time);
                     responseBox.Items.Add($"No response for requested record type {selectedRecordType} for {domainInput.Text}");
                     responseBox.Items.Add("-------------------------");
-
                     server.Text = serverAddress;
                 }
 

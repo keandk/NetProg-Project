@@ -34,6 +34,7 @@
             ipAddressLabel = new Label();
             lanRadioButton = new RadioButton();
             localRadioButton = new RadioButton();
+            newClient = new Button();
             dataGroup = new GroupBox();
             recordGridView = new DataGridView();
             domain = new DataGridViewTextBoxColumn();
@@ -41,8 +42,6 @@
             ttd = new DataGridViewTextBoxColumn();
             ipAddress = new DataGridViewTextBoxColumn();
             type = new DataGridViewTextBoxColumn();
-            value = new DataGridViewTextBoxColumn();
-            newClient = new Button();
             serverLogGroup.SuspendLayout();
             dataGroup.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)recordGridView).BeginInit();
@@ -56,15 +55,15 @@
             serverLog.Location = new Point(6, 26);
             serverLog.Name = "serverLog";
             serverLog.SelectionMode = SelectionMode.MultiSimple;
-            serverLog.Size = new Size(777, 344);
+            serverLog.Size = new Size(904, 344);
             serverLog.TabIndex = 0;
             // 
             // listenButton
             // 
             listenButton.BackColor = SystemColors.ActiveCaption;
-            listenButton.Location = new Point(149, 393);
+            listenButton.Location = new Point(324, 415);
             listenButton.Name = "listenButton";
-            listenButton.Size = new Size(94, 29);
+            listenButton.Size = new Size(112, 38);
             listenButton.TabIndex = 1;
             listenButton.Text = "Listen";
             listenButton.UseVisualStyleBackColor = false;
@@ -72,15 +71,15 @@
             // 
             // serverLogGroup
             // 
-            serverLogGroup.Controls.Add(newClient);
             serverLogGroup.Controls.Add(ipAddressLabel);
             serverLogGroup.Controls.Add(lanRadioButton);
             serverLogGroup.Controls.Add(localRadioButton);
             serverLogGroup.Controls.Add(serverLog);
+            serverLogGroup.Controls.Add(newClient);
             serverLogGroup.Controls.Add(listenButton);
             serverLogGroup.Location = new Point(12, 12);
             serverLogGroup.Name = "serverLogGroup";
-            serverLogGroup.Size = new Size(789, 456);
+            serverLogGroup.Size = new Size(916, 496);
             serverLogGroup.TabIndex = 3;
             serverLogGroup.TabStop = false;
             serverLogGroup.Text = "Server Log";
@@ -88,7 +87,7 @@
             // ipAddressLabel
             // 
             ipAddressLabel.AutoSize = true;
-            ipAddressLabel.Location = new Point(273, 397);
+            ipAddressLabel.Location = new Point(6, 470);
             ipAddressLabel.Name = "ipAddressLabel";
             ipAddressLabel.Size = new Size(85, 20);
             ipAddressLabel.TabIndex = 3;
@@ -97,7 +96,7 @@
             // lanRadioButton
             // 
             lanRadioButton.AutoSize = true;
-            lanRadioButton.Location = new Point(7, 419);
+            lanRadioButton.Location = new Point(494, 376);
             lanRadioButton.Name = "lanRadioButton";
             lanRadioButton.Size = new Size(58, 24);
             lanRadioButton.TabIndex = 2;
@@ -108,7 +107,7 @@
             // localRadioButton
             // 
             localRadioButton.AutoSize = true;
-            localRadioButton.Location = new Point(7, 382);
+            localRadioButton.Location = new Point(364, 376);
             localRadioButton.Name = "localRadioButton";
             localRadioButton.Size = new Size(65, 24);
             localRadioButton.TabIndex = 2;
@@ -116,12 +115,23 @@
             localRadioButton.Text = "Local";
             localRadioButton.UseVisualStyleBackColor = true;
             // 
+            // newClient
+            // 
+            newClient.BackColor = SystemColors.ActiveCaption;
+            newClient.Location = new Point(480, 415);
+            newClient.Name = "newClient";
+            newClient.Size = new Size(112, 38);
+            newClient.TabIndex = 1;
+            newClient.Text = "New Client";
+            newClient.UseVisualStyleBackColor = false;
+            newClient.Click += newClient_Click;
+            // 
             // dataGroup
             // 
             dataGroup.Controls.Add(recordGridView);
-            dataGroup.Location = new Point(831, 12);
+            dataGroup.Location = new Point(934, 12);
             dataGroup.Name = "dataGroup";
-            dataGroup.Size = new Size(789, 456);
+            dataGroup.Size = new Size(685, 496);
             dataGroup.TabIndex = 4;
             dataGroup.TabStop = false;
             dataGroup.Text = "Data";
@@ -129,12 +139,13 @@
             // recordGridView
             // 
             recordGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            recordGridView.Columns.AddRange(new DataGridViewColumn[] { domain, ttl, ttd, ipAddress, type, value });
-            recordGridView.Location = new Point(6, 26);
+            recordGridView.Columns.AddRange(new DataGridViewColumn[] { domain, ttl, ttd, ipAddress, type });
+            recordGridView.Dock = DockStyle.Fill;
+            recordGridView.Location = new Point(3, 23);
             recordGridView.Name = "recordGridView";
             recordGridView.RowHeadersWidth = 51;
             recordGridView.RowTemplate.Height = 29;
-            recordGridView.Size = new Size(777, 344);
+            recordGridView.Size = new Size(679, 470);
             recordGridView.TabIndex = 0;
             // 
             // domain
@@ -172,29 +183,11 @@
             type.Name = "type";
             type.Width = 125;
             // 
-            // value
-            // 
-            value.HeaderText = "Value";
-            value.MinimumWidth = 6;
-            value.Name = "value";
-            value.Width = 125;
-            // 
-            // newClient
-            // 
-            newClient.BackColor = SystemColors.ActiveCaption;
-            newClient.Location = new Point(689, 393);
-            newClient.Name = "newClient";
-            newClient.Size = new Size(94, 29);
-            newClient.TabIndex = 4;
-            newClient.Text = "New Client";
-            newClient.UseVisualStyleBackColor = false;
-            newClient.Click += newClient_Click;
-            // 
             // Server
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1631, 480);
+            ClientSize = new Size(1631, 520);
             Controls.Add(dataGroup);
             Controls.Add(serverLogGroup);
             Name = "Server";
@@ -213,15 +206,14 @@
         private GroupBox serverLogGroup;
         private GroupBox dataGroup;
         private DataGridView recordGridView;
+        private RadioButton localRadioButton;
+        private RadioButton lanRadioButton;
+        private Label ipAddressLabel;
+        private Button newClient;
         private DataGridViewTextBoxColumn domain;
         private DataGridViewTextBoxColumn ttl;
         private DataGridViewTextBoxColumn ttd;
         private DataGridViewTextBoxColumn ipAddress;
         private DataGridViewTextBoxColumn type;
-        private DataGridViewTextBoxColumn value;
-        private RadioButton localRadioButton;
-        private RadioButton lanRadioButton;
-        private Label ipAddressLabel;
-        private Button newClient;
     }
 }

@@ -29,45 +29,30 @@ namespace DNS_Simulation
         /// </summary>
         private void InitializeComponent()
         {
-            label1 = new Label();
-            domainInput = new TextBox();
             sendButton = new Button();
             responseBox = new ListBox();
             groupBox1 = new GroupBox();
-            messageSize = new Label();
+            loadBalancerLabel = new Label();
             when = new Label();
             server = new Label();
             queryTime = new Label();
             clearButton = new Button();
-            label2 = new Label();
-            type = new ComboBox();
             label3 = new Label();
             loadBalancerIpAddressTextBox = new TextBox();
             label4 = new Label();
             loadBalancerPortTextBox = new TextBox();
+            type = new ComboBox();
+            label2 = new Label();
+            domainInput = new TextBox();
+            label1 = new Label();
+            connectButton = new Button();
             groupBox1.SuspendLayout();
             SuspendLayout();
-            // 
-            // label1
-            // 
-            label1.AutoSize = true;
-            label1.Location = new Point(20, 16);
-            label1.Name = "label1";
-            label1.Size = new Size(62, 20);
-            label1.TabIndex = 0;
-            label1.Text = "Domain";
-            // 
-            // domainInput
-            // 
-            domainInput.Location = new Point(88, 13);
-            domainInput.Name = "domainInput";
-            domainInput.Size = new Size(194, 27);
-            domainInput.TabIndex = 1;
             // 
             // sendButton
             // 
             sendButton.BackColor = SystemColors.ActiveCaption;
-            sendButton.Location = new Point(549, 28);
+            sendButton.Location = new Point(542, 50);
             sendButton.Name = "sendButton";
             sendButton.Size = new Size(94, 29);
             sendButton.TabIndex = 2;
@@ -87,7 +72,7 @@ namespace DNS_Simulation
             // 
             // groupBox1
             // 
-            groupBox1.Controls.Add(messageSize);
+            groupBox1.Controls.Add(loadBalancerLabel);
             groupBox1.Controls.Add(when);
             groupBox1.Controls.Add(server);
             groupBox1.Controls.Add(queryTime);
@@ -98,19 +83,19 @@ namespace DNS_Simulation
             groupBox1.TabStop = false;
             groupBox1.Text = "Summary";
             // 
-            // messageSize
+            // loadBalancerLabel
             // 
-            messageSize.AutoSize = true;
-            messageSize.Location = new Point(12, 132);
-            messageSize.Name = "messageSize";
-            messageSize.Size = new Size(103, 20);
-            messageSize.TabIndex = 8;
-            messageSize.Text = "Message size: ";
+            loadBalancerLabel.AutoSize = true;
+            loadBalancerLabel.Location = new Point(10, 133);
+            loadBalancerLabel.Name = "loadBalancerLabel";
+            loadBalancerLabel.Size = new Size(105, 20);
+            loadBalancerLabel.TabIndex = 8;
+            loadBalancerLabel.Text = "Connected to: ";
             // 
             // when
             // 
             when.AutoSize = true;
-            when.Location = new Point(12, 98);
+            when.Location = new Point(10, 99);
             when.Name = "when";
             when.Size = new Size(54, 20);
             when.TabIndex = 7;
@@ -119,7 +104,7 @@ namespace DNS_Simulation
             // server
             // 
             server.AutoSize = true;
-            server.Location = new Point(12, 65);
+            server.Location = new Point(10, 66);
             server.Name = "server";
             server.Size = new Size(57, 20);
             server.TabIndex = 6;
@@ -128,7 +113,7 @@ namespace DNS_Simulation
             // queryTime
             // 
             queryTime.AutoSize = true;
-            queryTime.Location = new Point(12, 32);
+            queryTime.Location = new Point(10, 33);
             queryTime.Name = "queryTime";
             queryTime.Size = new Size(89, 20);
             queryTime.TabIndex = 5;
@@ -137,7 +122,7 @@ namespace DNS_Simulation
             // clearButton
             // 
             clearButton.BackColor = Color.RosyBrown;
-            clearButton.Location = new Point(670, 28);
+            clearButton.Location = new Point(663, 50);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(94, 29);
             clearButton.TabIndex = 5;
@@ -145,28 +130,10 @@ namespace DNS_Simulation
             clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += clearButton_Click;
             // 
-            // label2
-            // 
-            label2.AutoSize = true;
-            label2.Location = new Point(304, 16);
-            label2.Name = "label2";
-            label2.Size = new Size(40, 20);
-            label2.TabIndex = 6;
-            label2.Text = "Type";
-            // 
-            // type
-            // 
-            type.FormattingEnabled = true;
-            type.Items.AddRange(new object[] { "A", "AAAA", "CNAME", "ANY", "MX", "NS", "TXT", "PTR" });
-            type.Location = new Point(350, 13);
-            type.Name = "type";
-            type.Size = new Size(151, 28);
-            type.TabIndex = 7;
-            // 
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(20, 54);
+            label3.Location = new Point(22, 15);
             label3.Name = "label3";
             label3.Size = new Size(78, 20);
             label3.TabIndex = 0;
@@ -174,15 +141,15 @@ namespace DNS_Simulation
             // 
             // loadBalancerIpAddressTextBox
             // 
-            loadBalancerIpAddressTextBox.Location = new Point(104, 51);
+            loadBalancerIpAddressTextBox.Location = new Point(106, 12);
             loadBalancerIpAddressTextBox.Name = "loadBalancerIpAddressTextBox";
-            loadBalancerIpAddressTextBox.Size = new Size(194, 27);
+            loadBalancerIpAddressTextBox.Size = new Size(205, 27);
             loadBalancerIpAddressTextBox.TabIndex = 1;
             // 
             // label4
             // 
             label4.AutoSize = true;
-            label4.Location = new Point(320, 54);
+            label4.Location = new Point(322, 15);
             label4.Name = "label4";
             label4.Size = new Size(35, 20);
             label4.TabIndex = 0;
@@ -190,10 +157,56 @@ namespace DNS_Simulation
             // 
             // loadBalancerPortTextBox
             // 
-            loadBalancerPortTextBox.Location = new Point(361, 51);
+            loadBalancerPortTextBox.Location = new Point(363, 12);
             loadBalancerPortTextBox.Name = "loadBalancerPortTextBox";
             loadBalancerPortTextBox.Size = new Size(140, 27);
             loadBalancerPortTextBox.TabIndex = 1;
+            loadBalancerPortTextBox.Text = "8080";
+            // 
+            // type
+            // 
+            type.FormattingEnabled = true;
+            type.Items.AddRange(new object[] { "A", "AAAA", "CNAME", "ANY", "MX", "NS", "TXT", "PTR" });
+            type.Location = new Point(363, 51);
+            type.Name = "type";
+            type.Size = new Size(140, 28);
+            type.TabIndex = 11;
+            // 
+            // label2
+            // 
+            label2.AutoSize = true;
+            label2.Location = new Point(317, 54);
+            label2.Name = "label2";
+            label2.Size = new Size(40, 20);
+            label2.TabIndex = 10;
+            label2.Text = "Type";
+            // 
+            // domainInput
+            // 
+            domainInput.Location = new Point(90, 51);
+            domainInput.Name = "domainInput";
+            domainInput.Size = new Size(221, 27);
+            domainInput.TabIndex = 9;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(22, 54);
+            label1.Name = "label1";
+            label1.Size = new Size(62, 20);
+            label1.TabIndex = 8;
+            label1.Text = "Domain";
+            // 
+            // connectButton
+            // 
+            connectButton.BackColor = SystemColors.ActiveCaption;
+            connectButton.Location = new Point(602, 11);
+            connectButton.Name = "connectButton";
+            connectButton.Size = new Size(94, 29);
+            connectButton.TabIndex = 2;
+            connectButton.Text = "Connect";
+            connectButton.UseVisualStyleBackColor = false;
+            connectButton.Click += connectButton_Click;
             // 
             // Client
             // 
@@ -202,16 +215,17 @@ namespace DNS_Simulation
             ClientSize = new Size(800, 538);
             Controls.Add(type);
             Controls.Add(label2);
+            Controls.Add(domainInput);
+            Controls.Add(label1);
             Controls.Add(clearButton);
             Controls.Add(groupBox1);
             Controls.Add(responseBox);
+            Controls.Add(connectButton);
             Controls.Add(sendButton);
             Controls.Add(loadBalancerPortTextBox);
             Controls.Add(label4);
             Controls.Add(loadBalancerIpAddressTextBox);
             Controls.Add(label3);
-            Controls.Add(domainInput);
-            Controls.Add(label1);
             Name = "Client";
             Text = "Client";
             groupBox1.ResumeLayout(false);
@@ -221,22 +235,22 @@ namespace DNS_Simulation
         }
 
         #endregion
-
-        private Label label1;
-        private TextBox domainInput;
         private Button sendButton;
         private ListBox responseBox;
         private GroupBox groupBox1;
         private Label when;
         private Label server;
         private Label queryTime;
-        private Label messageSize;
         private Button clearButton;
-        private Label label2;
-        private ComboBox type;
         private Label label3;
         private TextBox loadBalancerIpAddressTextBox;
         private Label label4;
         private TextBox loadBalancerPortTextBox;
+        private ComboBox type;
+        private Label label2;
+        private TextBox domainInput;
+        private Label label1;
+        private Button connectButton;
+        private Label loadBalancerLabel;
     }
 }

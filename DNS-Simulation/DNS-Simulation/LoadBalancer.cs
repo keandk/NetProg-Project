@@ -1,10 +1,7 @@
-﻿using System;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
-using System.Threading.Tasks;
 using Ae.Dns.Client;
 using Ae.Dns.Protocol;
-using DNS.Protocol;
 
 namespace DNS_Simulation
 {

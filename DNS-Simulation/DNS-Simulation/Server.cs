@@ -1,17 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Windows.Forms;
-using DNS.Client;
-using DNS.Server;
+﻿using DNS.Server;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
-using System.Data.SQLite;
 using System.Net;
-using System.Threading.Tasks;
 using DNS.Client.RequestResolver;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Net.NetworkInformation;
+using System.Diagnostics;
 
 namespace DNS_Simulation
 {
@@ -29,54 +24,68 @@ namespace DNS_Simulation
 
         private void UpdateRecordGridView(MasterFile masterFile)
         {
-            recordGridView.Rows.Clear();
-
-            // Sử dụng reflection để truy cập trường 'entries' được bảo vệ
-            FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
-            IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
-
-            foreach (var entry in entries)
+            try
             {
-                string domain = entry.Name.ToString();
-                string initialTtl = entry.TimeToLive.ToString();
+                recordGridView.Rows.Clear();
 
-                // Tính toán TTL còn lại dựa trên thời gian hiện tại và timestamp khi bản ghi được thêm
-                TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
-                TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
-
-                // Định dạng TTL còn lại dưới dạng chuỗi (e.g., "mm:ss")
-                string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
-
-                string value = string.Empty;
-                string type = entry.Type.ToString();
-
-                switch (entry)
+                if (masterFile == null)
                 {
-                    case IPAddressResourceRecord ipAddressRecord:
-                        value = ipAddressRecord.IPAddress.ToString();
-                        break;
-                    case CanonicalNameResourceRecord cnameRecord:
-                        value = cnameRecord.CanonicalDomainName.ToString();
-                        break;
-                    case PointerResourceRecord ptrRecord:
-                        value = ptrRecord.PointerDomainName.ToString();
-                        break;
-                    case MailExchangeResourceRecord mxRecord:
-                        value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
-                        break;
-                    case NameServerResourceRecord nsRecord:
-                        value = nsRecord.NSDomainName.ToString();
-                        break;
-                    case TextResourceRecord txtRecord:
-                        value = txtRecord.ToStringTextData();
-                        break;
+                    Debug.WriteLine("MasterFile is null.");
+                    return;
                 }
 
-                // Add a new row to the recordGridView
-                recordGridView.Rows.Add(Guid.NewGuid().ToString(), domain, initialTtl, formattedRemainingTtl, value, type);
+                FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
+
+                if (entries == null)
+                {
+                    Debug.WriteLine("Entries is null.");
+                    return;
+                }
+
+                foreach (var entry in entries)
+                {
+                    string domain = entry.Name.ToString();
+                    string initialTtl = entry.TimeToLive.ToString();
+
+                    TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
+                    TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
+
+                    string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
+
+                    string value = string.Empty;
+                    string type = entry.Type.ToString();
+
+                    switch (entry)
+                    {
+                        case IPAddressResourceRecord ipAddressRecord:
+                            value = ipAddressRecord.IPAddress.ToString();
+                            break;
+                        case CanonicalNameResourceRecord cnameRecord:
+                            value = cnameRecord.CanonicalDomainName.ToString();
+                            break;
+                        case PointerResourceRecord ptrRecord:
+                            value = ptrRecord.PointerDomainName.ToString();
+                            break;
+                        case MailExchangeResourceRecord mxRecord:
+                            value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
+                            break;
+                        case NameServerResourceRecord nsRecord:
+                            value = nsRecord.NSDomainName.ToString();
+                            break;
+                        case TextResourceRecord txtRecord:
+                            value = txtRecord.ToStringTextData();
+                            break;
+                    }
+
+                    recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error updating record grid view: {ex.Message}");
             }
         }
-
 
         private async void listenButton_Click(object sender, EventArgs e)
         {
@@ -90,66 +99,59 @@ namespace DNS_Simulation
 
                 UpdateRecordGridView(masterFile);
 
-                //Dictionary<string, bool> requestsInProgress = new Dictionary<string, bool>();
-
                 server1.Requested += (s, args) =>
                 {
+                    if (args.Request == null)
+                    {
+                        Debug.WriteLine("Request is null in server1.Requested event.");
+                        return;
+                    }
+
                     var request = args.Request;
                     var remoteEndpoint = args.Remote;
-                    var requestDomain = request.Questions[0].Name.ToString();
-
-                    //lock (requestsInProgress)
-                    //{
-                    //    if (requestsInProgress.ContainsKey(requestDomain))
-                    //    {
-                    //        // Request is already being processed by the other server, skip processing
-                    //        return;
-                    //    }
-                    //    requestsInProgress[requestDomain] = true;
-                    //}
+                    var requestDomain = request.Questions[0]?.Name?.ToString();
 
                     serverLog.Invoke(new Action(() =>
                     {
-                        serverLog.Items.Add($"DNS request received by Server 1 from: {remoteEndpoint} for {request.Questions[0].Name}");
+                        serverLog.Items.Add($"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
                     }));
                 };
 
                 server2.Requested += (s, args) =>
                 {
+                    if (args.Request == null)
+                    {
+                        Debug.WriteLine("Request is null in server2.Requested event.");
+                        return;
+                    }
+
                     var request = args.Request;
                     var remoteEndpoint = args.Remote;
-                    var requestDomain = request.Questions[0].Name.ToString();
-
-                    //lock (requestsInProgress)
-                    //{
-                    //    if (requestsInProgress.ContainsKey(requestDomain))
-                    //    {
-                    //        // Request is already being processed by the other server, skip processing
-                    //        return;
-                    //    }
-                    //    requestsInProgress[requestDomain] = true;
-                    //}
+                    var requestDomain = request.Questions[0]?.Name?.ToString();
 
                     serverLog.Invoke(new Action(() =>
                     {
-                        serverLog.Items.Add($"DNS request received by Server 2 from: {remoteEndpoint} for {request.Questions[0].Name}");
+                        serverLog.Items.Add($"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
                     }));
                 };
 
                 server1.Responded += async (sender, s) =>
                 {
-                    IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+                    try
+                    {
+                        if (s.Request == null || s.Response == null)
+                        {
+                            Debug.WriteLine("Request or Response is null in server1.Responded event.");
+                            return;
+                        }
 
-                    if (answers.Count > 0)
-                    {
-                        //foreach (var answer in answers)
-                        //{
-                        //    s.Response.AnswerRecords.Add(answer);
-                        //}
-                    }
-                    else
-                    {
-                        try
+                        IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
+                        if (answers.Count > 0)
+                        {
+                            // Answers found in the master file
+                        }
+                        else
                         {
                             await resolver.Resolve(s.Request);
                             if (s.Response.AnswerRecords.Count > 0)
@@ -177,41 +179,40 @@ namespace DNS_Simulation
 
                                     serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response}")));
                                 }
-                                //var answer = s.Response.AnswerRecords[0];
                             }
                             else
                             {
                                 serverLog.Invoke(new Action(() => serverLog.Items.Add($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error resolving domain: {s.Request.Questions[0].Name}. {ex.Message}")));
-                        }
                     }
-
-                    //lock (requestsInProgress)
-                    //{
-                    //    requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
-                    //}
-
-                    recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error in server1.Responded event: {ex.Message}");
+                    }
+                    finally
+                    {
+                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                    }
                 };
 
                 server2.Responded += async (sender, s) =>
                 {
-                    IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+                    try
+                    {
+                        if (s.Request == null || s.Response == null)
+                        {
+                            Debug.WriteLine("Request or Response is null in server2.Responded event.");
+                            return;
+                        }
 
-                    if (answers.Count > 0)
-                    {
-                        //foreach (var answer in answers)
-                        //{
-                        //    s.Response.AnswerRecords.Add(answer);
-                        //}
-                    }
-                    else
-                    {
-                        try
+                        IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
+                        if (answers.Count > 0)
+                        {
+                            // Answers found in the master file
+                        }
+                        else
                         {
                             await resolver.Resolve(s.Request);
                             if (s.Response.AnswerRecords.Count > 0)
@@ -239,38 +240,52 @@ namespace DNS_Simulation
 
                                     serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response}")));
                                 }
-                                //var answer = s.Response.AnswerRecords[0];
-
                             }
                             else
                             {
                                 serverLog.Invoke(new Action(() => serverLog.Items.Add($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
                             }
                         }
-                        catch (Exception ex)
-                        {
-                            serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error resolving domain: {s.Request.Questions[0].Name}. {ex.Message}")));
-                        }
                     }
-
-                    //lock (requestsInProgress)
-                    //{
-                    //    requestsInProgress.Remove(s.Request.Questions[0].Name.ToString());
-                    //}
-
-                    recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                    catch (Exception ex)
+                    {
+                        Debug.WriteLine($"Error in server2.Responded event: {ex.Message}");
+                    }
+                    finally
+                    {
+                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                    }
                 };
 
-                server1.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 1: {s.Exception.Message}")));
+                server1.Errored += (sender, s) =>
+                {
+                    if (s.Exception == null)
+                    {
+                        Debug.WriteLine("Exception is null in server1.Errored event.");
+                        return;
+                    }
+
+                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 1: {s.Exception.Message}")));
+                };
+
                 server1.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 1 is listening...")));
 
-                server2.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
+                server2.Errored += (sender, s) =>
+                {
+                    if (s.Exception == null)
+                    {
+                        Debug.WriteLine("Exception is null in server2.Errored event.");
+                        return;
+                    }
+
+                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
+                };
+
                 server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 2 is listening...")));
 
-                // Define the server endpoints
                 List<IPEndPoint> serverEndpoints = new();
+                IPAddress? serverIpAddressLan = GetLocalIPAddress();
 
-                IPAddress? serverIpAddress = GetLocalIPAddress();
                 if (localRadioButton.Checked)
                 {
                     IPAddress ip = IPAddress.Parse("127.0.0.1");
@@ -280,11 +295,11 @@ namespace DNS_Simulation
                 }
                 else if (lanRadioButton.Checked)
                 {
-                    if (serverIpAddress != null)
+                    if (serverIpAddressLan != null)
                     {
-                        serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8081));
-                        serverEndpoints.Add(new IPEndPoint(serverIpAddress, 8082));
-                        ipAddressLabel.Text = $"Load Balancer: {serverIpAddress}:8080";
+                        serverEndpoints.Add(new IPEndPoint(serverIpAddressLan, 8081));
+                        serverEndpoints.Add(new IPEndPoint(serverIpAddressLan, 8082));
+                        ipAddressLabel.Text = $"Load Balancer: {serverIpAddressLan}:8080";
                     }
                     else
                     {
@@ -298,19 +313,15 @@ namespace DNS_Simulation
                     return;
                 }
 
-                // Initialize the load balancer with server endpoints
                 loadBalancer = new LoadBalancer(serverEndpoints);
 
-                // Start the load balancer asynchronously
-                IPAddress? loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddress;
+                IPAddress? loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddressLan;
                 int loadBalancerPort = 8080;
                 Task loadBalancerTask = Task.Run(() => loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort));
 
-                // Start listening on the server endpoints asynchronously
                 Task listenTask1 = Task.Run(() => server1.Listen(serverEndpoints[0].Port, serverEndpoints[0].Address));
                 Task listenTask2 = Task.Run(() => server2.Listen(serverEndpoints[1].Port, serverEndpoints[1].Address));
 
-                // Wait for all tasks to complete
                 await Task.WhenAll(loadBalancerTask, listenTask1, listenTask2);
 
                 MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -323,29 +334,45 @@ namespace DNS_Simulation
 
         private static IPAddress? GetLocalIPAddress()
         {
-            var interfaces = NetworkInterface.GetAllNetworkInterfaces();
-            foreach (var iface in interfaces)
+            try
             {
-                if (iface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && iface.OperationalStatus == OperationalStatus.Up)
+                var interfaces = NetworkInterface.GetAllNetworkInterfaces();
+                foreach (var iface in interfaces)
                 {
-                    var ipProps = iface.GetIPProperties();
-                    foreach (var addr in ipProps.UnicastAddresses)
+                    if (iface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 && iface.OperationalStatus == OperationalStatus.Up)
                     {
-                        if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
+                        var ipProps = iface.GetIPProperties();
+                        foreach (var addr in ipProps.UnicastAddresses)
                         {
-                            return addr.Address;
+                            if (addr.Address.AddressFamily == AddressFamily.InterNetwork)
+                            {
+                                return addr.Address;
+                            }
                         }
                     }
                 }
             }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error retrieving local IP address: {ex.Message}");
+            }
+
             return null;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            server1?.Dispose();
-            server2?.Dispose();
+
+            try
+            {
+                server1?.Dispose();
+                server2?.Dispose();
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error disposing servers: {ex.Message}");
+            }
         }
 
         private void newClient_Click(object sender, EventArgs e)
@@ -359,7 +386,7 @@ namespace DNS_Simulation
     {
         public static DateTime GetTimestampAdded(this IResourceRecord record)
         {
-            return DateTime.Now; // Assume the current timestamp as the added timestamp
+            return DateTime.Now;
         }
     }
 
