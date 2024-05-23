@@ -287,39 +287,6 @@ namespace DNS_Simulation
                 server2.Errored += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
                 server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 2 is listening...")));
 
-                //var ipAddresses = NetworkInterface.GetAllNetworkInterfaces()
-                //                                    .Where(n => n.OperationalStatus == OperationalStatus.Up)
-                //                                    .SelectMany(n => n.GetIPProperties().UnicastAddresses)
-                //                                    .Where(a => a.Address.AddressFamily == AddressFamily.InterNetwork)
-                //                                    .Select(a => a.Address)
-                //                                    .ToList();
-                //if (localRadioButton.Checked)
-                //{
-                //    IPAddress ip = IPAddress.Parse("127.0.0.1");
-                //    Task listenTask1 = Task.Run(() => server1.Listen(8081, ip));
-                //    Task listenTask2 = Task.Run(() => server2.Listen(8082, ip));
-                //    ipAddressLabel.Text = $"IP Address: {ip}";
-                //    // Wait for both tasks to complete
-                //    await Task.WhenAll(listenTask1, listenTask2);
-                //}
-                //else if (lanRadioButton.Checked && ipAddresses.Count > 0)
-                //{
-                //    // Use the first available IP address
-                //    IPAddress serverIpAddress = ipAddresses[0];
-
-                //    // Create separate tasks for each Listen operation
-                //    Task listenTask1 = Task.Run(() => server1.Listen(8080, serverIpAddress));
-                //    Task listenTask2 = Task.Run(() => server2.Listen(8081, serverIpAddress));
-                //    ipAddressLabel.Text = $"IP Address: {serverIpAddress}";
-
-                //    // Wait for both tasks to complete
-                //    await Task.WhenAll(listenTask1, listenTask2);
-                //}
-                //else
-                //{
-                //    MessageBox.Show("No available IP addresses found for LAN mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                //}
-
                 // Define the server endpoints
                 List<IPEndPoint> serverEndpoints = new();
 
@@ -346,61 +313,37 @@ namespace DNS_Simulation
                 // Initialize the load balancer with server endpoints
                 loadBalancer = new LoadBalancer(serverEndpoints);
 
-                // Start the load balancer
+                // Start the load balancer asynchronously
                 IPAddress loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : IPAddress.Parse("127.0.2.2");
                 int loadBalancerPort = 8080;
-                await loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort);
+                Task loadBalancerTask = Task.Run(() => loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort));
 
-                // Start listening on the server endpoints
-                if (localRadioButton.Checked)
-                {
-                    IPAddress ip = IPAddress.Parse("127.0.0.1");
-                    Task listenTask1 = Task.Run(() => server1.Listen(8081, ip));
-                    Task listenTask2 = Task.Run(() => server2.Listen(8082, ip));
-                    // Wait for a maximum of 5 seconds
-                    bool tasksCompleted = Task.WaitAll(new[] { listenTask1, listenTask2 }, TimeSpan.FromSeconds(5));
+                // Start listening on the server endpoints asynchronously
+                Task listenTask1 = Task.Run(() => server1.Listen(serverEndpoints[0].Port, serverEndpoints[0].Address));
+                Task listenTask2 = Task.Run(() => server2.Listen(serverEndpoints[1].Port, serverEndpoints[1].Address));
 
-                    if (tasksCompleted)
-                    {
-                        // Tasks completed successfully
-                        MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        // Tasks did not complete within the specified timeout
-                        MessageBox.Show("Failed to start the servers.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else if (lanRadioButton.Checked)
-                {
-                    IPAddress serverIpAddress = IPAddress.Parse("127.0.2.2");
-                    Task listenTask1 = Task.Run(() => server1.Listen(8081, serverIpAddress));
-                    Task listenTask2 = Task.Run(() => server2.Listen(8082, serverIpAddress));
-                    // Wait for a maximum of 5 seconds
-                    bool tasksCompleted = Task.WaitAll(new[] { listenTask1, listenTask2 }, TimeSpan.FromSeconds(5));
+                // Wait for all tasks to complete
+                await Task.WhenAll(loadBalancerTask, listenTask1, listenTask2);
 
-                    if (tasksCompleted)
-                    {
-                        // Tasks completed successfully
-                        MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        // Tasks did not complete within the specified timeout
-                        MessageBox.Show("Failed to start the servers.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                    MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                }
-                else
-                {
-                    MessageBox.Show("No available IP addresses found for LAN mode.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
+                MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error starting server: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        private static IPAddress GetLocalIPAddress()
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            foreach (var ip in host.AddressList)
+            {
+                if (ip.AddressFamily == AddressFamily.InterNetwork)
+                {
+                    return ip;
+                }
+            }
+            return null;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
