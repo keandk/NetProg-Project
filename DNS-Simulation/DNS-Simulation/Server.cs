@@ -97,6 +97,14 @@ namespace DNS_Simulation
                 server1 = new DnsServer(masterFile, "1.1.1.1");
                 server2 = new DnsServer(masterFile, "8.8.8.8");
 
+                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.Parse("60")));
+                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("thanhvien.nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.Parse("60")));
+                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("members.nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.Parse("60")));
+
+                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("nhom3.com"), TimeSpan.Parse("300")));
+                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("thanhvien.nhom3.com"), TimeSpan.Parse("300")));
+                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("members.nhom3.com"), TimeSpan.Parse("300")));
+
                 UpdateRecordGridView(masterFile);
 
                 server1.Requested += (s, args) =>
@@ -113,7 +121,7 @@ namespace DNS_Simulation
 
                     serverLog.Invoke(new Action(() =>
                     {
-                        serverLog.Items.Add($"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
+                        serverLog.Items.Insert(0, $"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
                     }));
                 };
 
@@ -131,7 +139,7 @@ namespace DNS_Simulation
 
                     serverLog.Invoke(new Action(() =>
                     {
-                        serverLog.Items.Add($"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
+                        serverLog.Items.Insert(0, $"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
                     }));
                 };
 
@@ -177,12 +185,12 @@ namespace DNS_Simulation
                                             break;
                                     }
 
-                                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response}")));
+                                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Response: {response}")));
                                 }
                             }
                             else
                             {
-                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
+                                serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
                             }
                         }
                     }
@@ -238,12 +246,12 @@ namespace DNS_Simulation
                                             break;
                                     }
 
-                                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Response: {response}")));
+                                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Response: {response}")));
                                 }
                             }
                             else
                             {
-                                serverLog.Invoke(new Action(() => serverLog.Items.Add($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
+                                serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
                             }
                         }
                     }
@@ -265,10 +273,10 @@ namespace DNS_Simulation
                         return;
                     }
 
-                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 1: {s.Exception.Message}")));
+                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Error on Server 1: {s.Exception.Message}")));
                 };
 
-                server1.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 1 is listening...")));
+                server1.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, "Server 1 is listening...")));
 
                 server2.Errored += (sender, s) =>
                 {
@@ -278,10 +286,10 @@ namespace DNS_Simulation
                         return;
                     }
 
-                    serverLog.Invoke(new Action(() => serverLog.Items.Add($"Error on Server 2: {s.Exception.Message}")));
+                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Error on Server 2: {s.Exception.Message}")));
                 };
 
-                server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Add("Server 2 is listening...")));
+                server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, "Server 2 is listening...")));
 
                 List<IPEndPoint> serverEndpoints = new();
                 IPAddress? serverIpAddressLan = GetLocalIPAddress();

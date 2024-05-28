@@ -132,17 +132,17 @@ namespace DNS_Simulation
                 {
                     for (int i = 0; i < response.Answers.Count; i++)
                     {
-                        responseBox.Items.Add(time);
-                        responseBox.Items.Add(response.Answers[i].ToString());
-                        responseBox.Items.Add("-------------------------");
+                        responseBox.Items.Insert(0, "-------------------------");
+                        responseBox.Items.Insert(0, response.Answers[i].ToString());
+                        responseBox.Items.Insert(0, time);
                         server.Text = serverAddress;
                     }
                 }
                 else
                 {
-                    responseBox.Items.Add(time);
-                    responseBox.Items.Add($"No response for requested record type {selectedRecordType} for {domainInput.Text}");
-                    responseBox.Items.Add("-------------------------");
+                    responseBox.Items.Insert(0, "-------------------------");
+                    responseBox.Items.Insert(0, $"No response for requested record type {selectedRecordType} for {domainInput.Text}");
+                    responseBox.Items.Insert(0, time);
                     server.Text = serverAddress;
                 }
 
@@ -150,9 +150,12 @@ namespace DNS_Simulation
             }
             catch (Exception ex)
             {
-                responseBox.Items.Add(DateTime.Now.ToString());
-                responseBox.Items.Add($"Error: {ex.Message}");
-                responseBox.Items.Add("-------------------------");
+                //responseBox.Items.Add(DateTime.Now.ToString());
+                //responseBox.Items.Add($"Error: {ex.Message}");
+                //responseBox.Items.Add("-------------------------");
+                responseBox.Items.Insert(0, "-------------------------");
+                responseBox.Items.Insert(0, $"Error: {ex.Message}");
+                responseBox.Items.Insert(0, time);
             }
         }
 

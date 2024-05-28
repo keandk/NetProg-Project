@@ -1,6 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
-using Ae.Dns.Client;
+    using Ae.Dns.Client;
 using Ae.Dns.Protocol;
 
 namespace DNS_Simulation
@@ -16,7 +16,7 @@ namespace DNS_Simulation
             currentIndex = 0;
         }
 
-        private readonly object _lock = new object();
+        private readonly object _lock = new();
 
         public IPEndPoint GetNextServer()
         {
@@ -28,21 +28,21 @@ namespace DNS_Simulation
             }
         }
 
-        public async Task<DnsMessage> ResolveQuery(DnsMessage query)
-        {
-            IPEndPoint serverEndpoint = GetNextServer();
+        //public async Task<DnsMessage> ResolveQuery(DnsMessage query)
+        //{
+        //    IPEndPoint serverEndpoint = GetNextServer();
 
-            var options = new DnsUdpClientOptions
-            {
-                Endpoint = serverEndpoint,
-            };
+        //    var options = new DnsUdpClientOptions
+        //    {
+        //        Endpoint = serverEndpoint,
+        //    };
 
-            using (var dnsClient = new DnsUdpClient(options))
-            {
-                var response = await dnsClient.Query(query, CancellationToken.None);
-                return response;
-            }
-        }
+        //    using (var dnsClient = new DnsUdpClient(options))
+        //    {
+        //        var response = await dnsClient.Query(query, CancellationToken.None);
+        //        return response;
+        //    }
+        //}
 
         public async Task StartAsync(IPAddress ipAddress, int port)
         {

@@ -52,9 +52,9 @@ namespace DNS_Simulation
             // sendButton
             // 
             sendButton.BackColor = SystemColors.ActiveCaption;
-            sendButton.Location = new Point(542, 50);
+            sendButton.Location = new Point(509, 50);
             sendButton.Name = "sendButton";
-            sendButton.Size = new Size(94, 29);
+            sendButton.Size = new Size(148, 29);
             sendButton.TabIndex = 2;
             sendButton.Text = "Send";
             sendButton.UseVisualStyleBackColor = false;
@@ -124,7 +124,7 @@ namespace DNS_Simulation
             clearButton.BackColor = Color.RosyBrown;
             clearButton.Location = new Point(663, 50);
             clearButton.Name = "clearButton";
-            clearButton.Size = new Size(94, 29);
+            clearButton.Size = new Size(125, 29);
             clearButton.TabIndex = 5;
             clearButton.Text = "Clear";
             clearButton.UseVisualStyleBackColor = false;
@@ -200,9 +200,9 @@ namespace DNS_Simulation
             // connectButton
             // 
             connectButton.BackColor = SystemColors.ActiveCaption;
-            connectButton.Location = new Point(602, 11);
+            connectButton.Location = new Point(509, 11);
             connectButton.Name = "connectButton";
-            connectButton.Size = new Size(94, 29);
+            connectButton.Size = new Size(279, 29);
             connectButton.TabIndex = 2;
             connectButton.Text = "Connect";
             connectButton.UseVisualStyleBackColor = false;
