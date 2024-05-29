@@ -46,15 +46,18 @@ namespace DNS_Simulation
             domainInput = new TextBox();
             label1 = new Label();
             connectButton = new Button();
+            testToggle = new CheckBox();
+            label5 = new Label();
+            numOfRequests = new TextBox();
             groupBox1.SuspendLayout();
             SuspendLayout();
             // 
             // sendButton
             // 
             sendButton.BackColor = SystemColors.ActiveCaption;
-            sendButton.Location = new Point(509, 50);
+            sendButton.Location = new Point(672, 52);
             sendButton.Name = "sendButton";
-            sendButton.Size = new Size(148, 29);
+            sendButton.Size = new Size(148, 60);
             sendButton.TabIndex = 2;
             sendButton.Text = "Send";
             sendButton.UseVisualStyleBackColor = false;
@@ -65,9 +68,9 @@ namespace DNS_Simulation
             responseBox.FormattingEnabled = true;
             responseBox.HorizontalScrollbar = true;
             responseBox.ItemHeight = 20;
-            responseBox.Location = new Point(20, 84);
+            responseBox.Location = new Point(20, 150);
             responseBox.Name = "responseBox";
-            responseBox.Size = new Size(768, 264);
+            responseBox.Size = new Size(800, 344);
             responseBox.TabIndex = 3;
             // 
             // groupBox1
@@ -76,9 +79,9 @@ namespace DNS_Simulation
             groupBox1.Controls.Add(when);
             groupBox1.Controls.Add(server);
             groupBox1.Controls.Add(queryTime);
-            groupBox1.Location = new Point(20, 362);
+            groupBox1.Location = new Point(20, 500);
             groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(768, 164);
+            groupBox1.Size = new Size(800, 164);
             groupBox1.TabIndex = 4;
             groupBox1.TabStop = false;
             groupBox1.Text = "Summary";
@@ -122,9 +125,9 @@ namespace DNS_Simulation
             // clearButton
             // 
             clearButton.BackColor = Color.RosyBrown;
-            clearButton.Location = new Point(663, 50);
+            clearButton.Location = new Point(672, 115);
             clearButton.Name = "clearButton";
-            clearButton.Size = new Size(125, 29);
+            clearButton.Size = new Size(148, 29);
             clearButton.TabIndex = 5;
             clearButton.Text = "Clear";
             clearButton.UseVisualStyleBackColor = false;
@@ -167,7 +170,7 @@ namespace DNS_Simulation
             // 
             type.FormattingEnabled = true;
             type.Items.AddRange(new object[] { "A", "AAAA", "CNAME", "ANY", "MX", "NS", "TXT", "PTR" });
-            type.Location = new Point(363, 51);
+            type.Location = new Point(363, 49);
             type.Name = "type";
             type.Size = new Size(140, 28);
             type.TabIndex = 11;
@@ -175,7 +178,7 @@ namespace DNS_Simulation
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(317, 54);
+            label2.Location = new Point(317, 52);
             label2.Name = "label2";
             label2.Size = new Size(40, 20);
             label2.TabIndex = 10;
@@ -183,15 +186,15 @@ namespace DNS_Simulation
             // 
             // domainInput
             // 
-            domainInput.Location = new Point(90, 51);
+            domainInput.Location = new Point(106, 49);
             domainInput.Name = "domainInput";
-            domainInput.Size = new Size(221, 27);
+            domainInput.Size = new Size(205, 27);
             domainInput.TabIndex = 9;
             // 
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(22, 54);
+            label1.Location = new Point(22, 52);
             label1.Name = "label1";
             label1.Size = new Size(62, 20);
             label1.TabIndex = 8;
@@ -202,20 +205,49 @@ namespace DNS_Simulation
             connectButton.BackColor = SystemColors.ActiveCaption;
             connectButton.Location = new Point(509, 11);
             connectButton.Name = "connectButton";
-            connectButton.Size = new Size(279, 29);
+            connectButton.Size = new Size(148, 29);
             connectButton.TabIndex = 2;
             connectButton.Text = "Connect";
             connectButton.UseVisualStyleBackColor = false;
             connectButton.Click += connectButton_Click;
             // 
+            // testToggle
+            // 
+            testToggle.AutoSize = true;
+            testToggle.Location = new Point(509, 52);
+            testToggle.Name = "testToggle";
+            testToggle.Size = new Size(160, 24);
+            testToggle.TabIndex = 12;
+            testToggle.Text = "Test load balancing";
+            testToggle.UseVisualStyleBackColor = true;
+            // 
+            // label5
+            // 
+            label5.AutoSize = true;
+            label5.Location = new Point(408, 88);
+            label5.Name = "label5";
+            label5.Size = new Size(95, 20);
+            label5.TabIndex = 8;
+            label5.Text = "# of requests";
+            // 
+            // numOfRequests
+            // 
+            numOfRequests.Location = new Point(509, 85);
+            numOfRequests.Name = "numOfRequests";
+            numOfRequests.Size = new Size(157, 27);
+            numOfRequests.TabIndex = 9;
+            // 
             // Client
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(800, 538);
+            ClientSize = new Size(832, 676);
+            Controls.Add(testToggle);
             Controls.Add(type);
             Controls.Add(label2);
+            Controls.Add(numOfRequests);
             Controls.Add(domainInput);
+            Controls.Add(label5);
             Controls.Add(label1);
             Controls.Add(clearButton);
             Controls.Add(groupBox1);
@@ -252,5 +284,8 @@ namespace DNS_Simulation
         private Label label1;
         private Button connectButton;
         private Label loadBalancerLabel;
+        private CheckBox testToggle;
+        private Label label5;
+        private TextBox numOfRequests;
     }
 }

@@ -1,4 +1,5 @@
 ﻿using DNS.Server;
+using Ae.Dns.Server;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
 using System.Net;
@@ -16,74 +17,80 @@ namespace DNS_Simulation
         private DnsServer server2;
         private IRequestResolver resolver;
         private LoadBalancer loadBalancer;
+        private int server1RequestCount;
+        private int server2RequestCount;
 
         public Server()
         {
             InitializeComponent();
         }
 
-        private void UpdateRecordGridView(MasterFile masterFile)
+        private void UpdateRecordGridView(MasterFile masterFile, bool isTest)
         {
-            try
+            if (!isTest)
             {
-                recordGridView.Rows.Clear();
 
-                if (masterFile == null)
+                try
                 {
-                    Debug.WriteLine("MasterFile is null.");
-                    return;
-                }
+                    recordGridView.Rows.Clear();
 
-                FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
-
-                if (entries == null)
-                {
-                    Debug.WriteLine("Entries is null.");
-                    return;
-                }
-
-                foreach (var entry in entries)
-                {
-                    string domain = entry.Name.ToString();
-                    string initialTtl = entry.TimeToLive.ToString();
-
-                    TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
-                    TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
-
-                    string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
-
-                    string value = string.Empty;
-                    string type = entry.Type.ToString();
-
-                    switch (entry)
+                    if (masterFile == null)
                     {
-                        case IPAddressResourceRecord ipAddressRecord:
-                            value = ipAddressRecord.IPAddress.ToString();
-                            break;
-                        case CanonicalNameResourceRecord cnameRecord:
-                            value = cnameRecord.CanonicalDomainName.ToString();
-                            break;
-                        case PointerResourceRecord ptrRecord:
-                            value = ptrRecord.PointerDomainName.ToString();
-                            break;
-                        case MailExchangeResourceRecord mxRecord:
-                            value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
-                            break;
-                        case NameServerResourceRecord nsRecord:
-                            value = nsRecord.NSDomainName.ToString();
-                            break;
-                        case TextResourceRecord txtRecord:
-                            value = txtRecord.ToStringTextData();
-                            break;
+                        Debug.WriteLine("MasterFile is null.");
+                        return;
                     }
 
-                    recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
+                    FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                    IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
+
+                    if (entries == null)
+                    {
+                        Debug.WriteLine("Entries is null.");
+                        return;
+                    }
+
+                    foreach (var entry in entries)
+                    {
+                        string domain = entry.Name.ToString();
+                        string initialTtl = entry.TimeToLive.ToString();
+
+                        TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
+                        TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
+
+                        string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
+
+                        string value = string.Empty;
+                        string type = entry.Type.ToString();
+
+                        switch (entry)
+                        {
+                            case IPAddressResourceRecord ipAddressRecord:
+                                value = ipAddressRecord.IPAddress.ToString();
+                                break;
+                            case CanonicalNameResourceRecord cnameRecord:
+                                value = cnameRecord.CanonicalDomainName.ToString();
+                                break;
+                            case PointerResourceRecord ptrRecord:
+                                value = ptrRecord.PointerDomainName.ToString();
+                                break;
+                            case MailExchangeResourceRecord mxRecord:
+                                value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
+                                break;
+                            case NameServerResourceRecord nsRecord:
+                                value = nsRecord.NSDomainName.ToString();
+                                break;
+                            case TextResourceRecord txtRecord:
+                                value = txtRecord.ToStringTextData();
+                                break;
+                        }
+
+                        recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
+                    }
                 }
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine($"Error updating record grid view: {ex.Message}");
+                catch (Exception ex)
+                {
+                    Debug.WriteLine($"Error updating record grid view: {ex.Message}");
+                }
             }
         }
 
@@ -93,19 +100,20 @@ namespace DNS_Simulation
             {
                 CustomMasterFile masterFile = new();
                 resolver = masterFile;
+                bool isTest = testCheckBox.Checked;
 
                 server1 = new DnsServer(masterFile, "1.1.1.1");
-                server2 = new DnsServer(masterFile, "8.8.8.8");
+                server2 = new DnsServer(masterFile, "1.1.1.1");
 
-                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.Parse("60")));
-                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("thanhvien.nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.Parse("60")));
-                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("members.nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.Parse("60")));
+                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.FromMinutes(1)));
+                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("thanhvien.nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.FromMinutes(1)));
+                masterFile.Add(new IPAddressResourceRecord(Domain.FromString("members.nhom3.com"), IPAddress.Parse("127.0.0.1"), TimeSpan.FromMinutes(1)));
 
-                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("nhom3.com"), TimeSpan.Parse("300")));
-                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("thanhvien.nhom3.com"), TimeSpan.Parse("300")));
-                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("members.nhom3.com"), TimeSpan.Parse("300")));
+                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("nhom3.com"), TimeSpan.FromMinutes(1)));
+                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("thanhvien.nhom3.com"), TimeSpan.FromMinutes(1)));
+                masterFile.Add(new PointerResourceRecord(IPAddress.Parse("127.0.0.1"), Domain.FromString("members.nhom3.com"), TimeSpan.FromMinutes(1)));
 
-                UpdateRecordGridView(masterFile);
+                UpdateRecordGridView(masterFile, false);
 
                 server1.Requested += (s, args) =>
                 {
@@ -119,10 +127,17 @@ namespace DNS_Simulation
                     var remoteEndpoint = args.Remote;
                     var requestDomain = request.Questions[0]?.Name?.ToString();
 
-                    serverLog.Invoke(new Action(() =>
+                    if (isTest)
                     {
-                        serverLog.Items.Insert(0, $"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
-                    }));
+                        Interlocked.Increment(ref server1RequestCount);
+                    }
+                    else
+                    {
+                        serverLog.Invoke(new Action(() =>
+                        {
+                            serverLog.Items.Insert(0, $"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
+                        }));
+                    }
                 };
 
                 server2.Requested += (s, args) =>
@@ -137,10 +152,17 @@ namespace DNS_Simulation
                     var remoteEndpoint = args.Remote;
                     var requestDomain = request.Questions[0]?.Name?.ToString();
 
-                    serverLog.Invoke(new Action(() =>
+                    if (isTest)
                     {
-                        serverLog.Items.Insert(0, $"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
-                    }));
+                        Interlocked.Increment(ref server2RequestCount);
+                    }
+                    else
+                    {
+                        serverLog.Invoke(new Action(() =>
+                        {
+                            serverLog.Items.Insert(0, $"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
+                        }));
+                    }
                 };
 
                 server1.Responded += async (sender, s) =>
@@ -200,7 +222,7 @@ namespace DNS_Simulation
                     }
                     finally
                     {
-                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile, isTest)));
                     }
                 };
 
@@ -261,7 +283,7 @@ namespace DNS_Simulation
                     }
                     finally
                     {
-                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile)));
+                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile, isTest)));
                     }
                 };
 
@@ -321,7 +343,9 @@ namespace DNS_Simulation
                     return;
                 }
 
-                loadBalancer = new LoadBalancer(serverEndpoints);
+                int poolSize = 10;
+                loadBalancer = new LoadBalancer(serverEndpoints, poolSize);
+                //loadBalancer = new LoadBalancer(serverEndpoints);
 
                 IPAddress? loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddressLan;
                 int loadBalancerPort = 8080;
@@ -332,7 +356,14 @@ namespace DNS_Simulation
 
                 await Task.WhenAll(loadBalancerTask, listenTask1, listenTask2);
 
-                MessageBox.Show("Server started successfully", "Success", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                if (isTest)
+                {
+                    serverLog.Invoke(new Action(() =>
+                    {
+                        serverLog.Items.Insert(0, $"Server 1 received {server1RequestCount} requests.");
+                        serverLog.Items.Insert(0, $"Server 2 received {server2RequestCount} requests.");
+                    }));
+                }
             }
             catch (Exception ex)
             {
@@ -387,6 +418,12 @@ namespace DNS_Simulation
         {
             Client clientForm = new();
             clientForm.Show();
+        }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            // Clear the server log
+            serverLog.Items.Clear();
         }
     }
 

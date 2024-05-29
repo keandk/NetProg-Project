@@ -1,48 +1,70 @@
-﻿using System.Net;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
+using System.Net;
 using System.Net.Sockets;
-    using Ae.Dns.Client;
+using Ae.Dns.Client;
+using Ae.Dns.Client.Exceptions;
 using Ae.Dns.Protocol;
+using Ae.Dns.Protocol.Enums;
 
 namespace DNS_Simulation
 {
-    public class LoadBalancer
+    public class DnsClientPool
     {
-        private List<IPEndPoint> servers;
-        private int currentIndex;
+        private readonly ConcurrentBag<DnsUdpClient> _clientPool;
+        private readonly Func<DnsUdpClient> _clientFactory;
+        private readonly int _maxPoolSize;
 
-        public LoadBalancer(List<IPEndPoint> servers)
+        public DnsClientPool(int maxPoolSize, Func<DnsUdpClient> clientFactory)
         {
-            this.servers = servers;
-            currentIndex = 0;
+            _clientPool = new ConcurrentBag<DnsUdpClient>();
+            _clientFactory = clientFactory;
+            _maxPoolSize = maxPoolSize;
         }
 
-        private readonly object _lock = new();
-
-        public IPEndPoint GetNextServer()
+        public DnsUdpClient GetClient()
         {
-            lock (_lock)
+            if (_clientPool.TryTake(out var client))
             {
-                IPEndPoint server = servers[currentIndex];
-                currentIndex = (currentIndex + 1) % servers.Count;
-                return server;
+                return client;
+            }
+            return _clientFactory();
+        }
+
+        public void ReturnClient(DnsUdpClient client)
+        {
+            if (_clientPool.Count < _maxPoolSize)
+            {
+                _clientPool.Add(client);
+            }
+            else
+            {
+                client.Dispose();
             }
         }
+    }
 
-        //public async Task<DnsMessage> ResolveQuery(DnsMessage query)
-        //{
-        //    IPEndPoint serverEndpoint = GetNextServer();
+    public class LoadBalancer
+    {
+        private readonly DnsClientPool _dnsClientPool;
+        private readonly List<IPEndPoint> _servers;
 
-        //    var options = new DnsUdpClientOptions
-        //    {
-        //        Endpoint = serverEndpoint,
-        //    };
+        public LoadBalancer(List<IPEndPoint> servers, int maxPoolSize)
+        {
+            _servers = servers;
+            _dnsClientPool = new DnsClientPool(maxPoolSize, () => CreateDnsUdpClient());
+        }
 
-        //    using (var dnsClient = new DnsUdpClient(options))
-        //    {
-        //        var response = await dnsClient.Query(query, CancellationToken.None);
-        //        return response;
-        //    }
-        //}
+        private DnsUdpClient CreateDnsUdpClient()
+        {
+            var endpoint = _servers[new Random().Next(_servers.Count)];
+            var options = new DnsUdpClientOptions
+            {
+                Endpoint = endpoint,
+                Timeout = TimeSpan.FromSeconds(10) // Adjust the timeout as needed
+            };
+            return new DnsUdpClient(options);
+        }
 
         public async Task StartAsync(IPAddress ipAddress, int port)
         {
@@ -52,54 +74,76 @@ namespace DNS_Simulation
                 while (true)
                 {
                     var result = await udpClient.ReceiveAsync();
-                    var serverEndpoint = GetNextServer();
-
-                    var query = new DnsMessage();
-                    int offset = 0;
-                    query.ReadBytes(result.Buffer, ref offset);
-
-                    var header = query.Header;
-
-                    // Create a new DnsMessage with the extracted header
-                    var serverQuery = new DnsMessage
-                    {
-                        Header = new DnsHeader
-                        {
-                            Id = header.Id,
-                            IsQueryResponse = header.IsQueryResponse,
-                            OperationCode = header.OperationCode,
-                            AuthoritativeAnswer = header.AuthoritativeAnswer,
-                            Truncation = header.Truncation,
-                            RecursionDesired = header.RecursionDesired,
-                            RecursionAvailable = header.RecursionAvailable,
-                            ResponseCode = header.ResponseCode,
-                            QuestionCount = header.QuestionCount,
-                            AnswerRecordCount = header.AnswerRecordCount,
-                            NameServerRecordCount = header.NameServerRecordCount,
-                            AdditionalRecordCount = header.AdditionalRecordCount,
-                            QueryType = header.QueryType,
-                            QueryClass = header.QueryClass,
-                            Host = header.Host
-                        }
-                    };
-
-                    // Resolve the server query using the selected server endpoint
-                    var options = new DnsUdpClientOptions
-                    {
-                        Endpoint = serverEndpoint,
-                    };
-
-                    using (var dnsClient = new DnsUdpClient(options))
-                    {
-                        var response = await dnsClient.Query(serverQuery, CancellationToken.None);
-
-                        var responseBytes = new byte[udpClient.Client.ReceiveBufferSize];
-                        offset = 0;
-                        response.WriteBytes(responseBytes, ref offset);
-
-                        await udpClient.SendAsync(responseBytes, offset, result.RemoteEndPoint);
-                    }
+                    _ = ProcessRequestAsync(result, udpClient);
                 }
+            }
+        }
+
+        private async Task ProcessRequestAsync(UdpReceiveResult result, UdpClient udpClient)
+        {
+            try
+            {
+                var query = new DnsMessage();
+                int offset = 0;
+                query.ReadBytes(result.Buffer, ref offset);
+
+                var header = query.Header;
+
+                // Create a new DnsMessage with the extracted header
+                var serverQuery = new DnsMessage
+                {
+                    Header = new DnsHeader
+                    {
+                        Id = header.Id,
+                        IsQueryResponse = header.IsQueryResponse,
+                        OperationCode = header.OperationCode,
+                        AuthoritativeAnswer = header.AuthoritativeAnswer,
+                        Truncation = header.Truncation,
+                        RecursionDesired = header.RecursionDesired,
+                        RecursionAvailable = header.RecursionAvailable,
+                        ResponseCode = header.ResponseCode,
+                        QuestionCount = header.QuestionCount,
+                        AnswerRecordCount = header.AnswerRecordCount,
+                        NameServerRecordCount = header.NameServerRecordCount,
+                        AdditionalRecordCount = header.AdditionalRecordCount,
+                        QueryType = header.QueryType,
+                        QueryClass = header.QueryClass,
+                        Host = header.Host
+                    }
+                };
+
+                var dnsClient = _dnsClientPool.GetClient();
+                try
+                {
+                    var response = await dnsClient.Query(serverQuery, CancellationToken.None);
+
+                    var responseBytes = new byte[udpClient.Client.ReceiveBufferSize];
+                    offset = 0;
+                    response.WriteBytes(responseBytes, ref offset);
+
+                    await udpClient.SendAsync(responseBytes, offset, result.RemoteEndPoint);
+                }
+                catch (DnsClientTimeoutException ex)
+                {
+                    Console.WriteLine("Timeout");
+                    // Handle DNS client timeout exception
+                    // Retry with a different server or return an appropriate response
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Error");
+                    // Handle other exceptions
+                    // Log the error and return an appropriate response
+                }
+                finally
+                {
+                    _dnsClientPool.ReturnClient(dnsClient);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Handle the exception gracefully
+                Debug.WriteLine($"Error processing request: {ex.Message}");
             }
         }
     }

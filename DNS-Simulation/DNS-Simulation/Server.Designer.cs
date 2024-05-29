@@ -31,6 +31,8 @@
             serverLog = new ListBox();
             listenButton = new Button();
             serverLogGroup = new GroupBox();
+            clearLogButton = new Button();
+            testCheckBox = new CheckBox();
             ipAddressLabel = new Label();
             lanRadioButton = new RadioButton();
             localRadioButton = new RadioButton();
@@ -61,7 +63,7 @@
             // listenButton
             // 
             listenButton.BackColor = SystemColors.ActiveCaption;
-            listenButton.Location = new Point(324, 415);
+            listenButton.Location = new Point(324, 435);
             listenButton.Name = "listenButton";
             listenButton.Size = new Size(112, 38);
             listenButton.TabIndex = 1;
@@ -71,6 +73,8 @@
             // 
             // serverLogGroup
             // 
+            serverLogGroup.Controls.Add(clearLogButton);
+            serverLogGroup.Controls.Add(testCheckBox);
             serverLogGroup.Controls.Add(ipAddressLabel);
             serverLogGroup.Controls.Add(lanRadioButton);
             serverLogGroup.Controls.Add(localRadioButton);
@@ -84,6 +88,27 @@
             serverLogGroup.TabStop = false;
             serverLogGroup.Text = "Server Log";
             // 
+            // clearLogButton
+            // 
+            clearLogButton.BackColor = Color.RosyBrown;
+            clearLogButton.Location = new Point(798, 376);
+            clearLogButton.Name = "clearLogButton";
+            clearLogButton.Size = new Size(112, 38);
+            clearLogButton.TabIndex = 5;
+            clearLogButton.Text = "Clear";
+            clearLogButton.UseVisualStyleBackColor = false;
+            clearLogButton.Click += clearButton_Click;
+            // 
+            // testCheckBox
+            // 
+            testCheckBox.AutoSize = true;
+            testCheckBox.Location = new Point(382, 405);
+            testCheckBox.Name = "testCheckBox";
+            testCheckBox.Size = new Size(152, 24);
+            testCheckBox.TabIndex = 4;
+            testCheckBox.Text = "Test load balancer";
+            testCheckBox.UseVisualStyleBackColor = true;
+            // 
             // ipAddressLabel
             // 
             ipAddressLabel.AutoSize = true;
@@ -96,7 +121,7 @@
             // lanRadioButton
             // 
             lanRadioButton.AutoSize = true;
-            lanRadioButton.Location = new Point(494, 376);
+            lanRadioButton.Location = new Point(491, 376);
             lanRadioButton.Name = "lanRadioButton";
             lanRadioButton.Size = new Size(58, 24);
             lanRadioButton.TabIndex = 2;
@@ -107,7 +132,7 @@
             // localRadioButton
             // 
             localRadioButton.AutoSize = true;
-            localRadioButton.Location = new Point(364, 376);
+            localRadioButton.Location = new Point(367, 376);
             localRadioButton.Name = "localRadioButton";
             localRadioButton.Size = new Size(65, 24);
             localRadioButton.TabIndex = 2;
@@ -118,7 +143,7 @@
             // newClient
             // 
             newClient.BackColor = SystemColors.ActiveCaption;
-            newClient.Location = new Point(480, 415);
+            newClient.Location = new Point(480, 435);
             newClient.Name = "newClient";
             newClient.Size = new Size(112, 38);
             newClient.TabIndex = 1;
@@ -171,7 +196,7 @@
             // 
             // ipAddress
             // 
-            ipAddress.HeaderText = "IP Address";
+            ipAddress.HeaderText = "Value";
             ipAddress.MinimumWidth = 6;
             ipAddress.Name = "ipAddress";
             ipAddress.Width = 125;
@@ -210,6 +235,8 @@
         private RadioButton lanRadioButton;
         private Label ipAddressLabel;
         private Button newClient;
+        private CheckBox testCheckBox;
+        private Button clearLogButton;
         private DataGridViewTextBoxColumn domain;
         private DataGridViewTextBoxColumn ttl;
         private DataGridViewTextBoxColumn ttd;
