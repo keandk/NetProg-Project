@@ -19,6 +19,7 @@ namespace DNS_Simulation
         private LoadBalancer loadBalancer;
         private int server1RequestCount;
         private int server2RequestCount;
+        private const int MaxServerLogItems = 500;
 
         public Server()
         {
@@ -29,62 +30,124 @@ namespace DNS_Simulation
         {
             if (!isTest)
             {
-
                 try
                 {
-                    recordGridView.Rows.Clear();
-
-                    if (masterFile == null)
+                    if (recordGridView.InvokeRequired)
                     {
-                        Debug.WriteLine("MasterFile is null.");
-                        return;
-                    }
-
-                    FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
-                    IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
-
-                    if (entries == null)
-                    {
-                        Debug.WriteLine("Entries is null.");
-                        return;
-                    }
-
-                    foreach (var entry in entries)
-                    {
-                        string domain = entry.Name.ToString();
-                        string initialTtl = entry.TimeToLive.ToString();
-
-                        TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
-                        TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
-
-                        string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
-
-                        string value = string.Empty;
-                        string type = entry.Type.ToString();
-
-                        switch (entry)
+                        recordGridView.BeginInvoke(new Action(() =>
                         {
-                            case IPAddressResourceRecord ipAddressRecord:
-                                value = ipAddressRecord.IPAddress.ToString();
-                                break;
-                            case CanonicalNameResourceRecord cnameRecord:
-                                value = cnameRecord.CanonicalDomainName.ToString();
-                                break;
-                            case PointerResourceRecord ptrRecord:
-                                value = ptrRecord.PointerDomainName.ToString();
-                                break;
-                            case MailExchangeResourceRecord mxRecord:
-                                value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
-                                break;
-                            case NameServerResourceRecord nsRecord:
-                                value = nsRecord.NSDomainName.ToString();
-                                break;
-                            case TextResourceRecord txtRecord:
-                                value = txtRecord.ToStringTextData();
-                                break;
+                            recordGridView.Rows.Clear();
+
+                            if (masterFile == null)
+                            {
+                                Debug.WriteLine("MasterFile is null.");
+                                return;
+                            }
+
+                            FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                            IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
+
+                            if (entries == null)
+                            {
+                                Debug.WriteLine("Entries is null.");
+                                return;
+                            }
+
+                            foreach (var entry in entries)
+                            {
+                                string domain = entry.Name.ToString();
+                                string initialTtl = entry.TimeToLive.ToString();
+
+                                TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
+                                TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
+
+                                string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
+
+                                string value = string.Empty;
+                                string type = entry.Type.ToString();
+
+                                switch (entry)
+                                {
+                                    case IPAddressResourceRecord ipAddressRecord:
+                                        value = ipAddressRecord.IPAddress.ToString();
+                                        break;
+                                    case CanonicalNameResourceRecord cnameRecord:
+                                        value = cnameRecord.CanonicalDomainName.ToString();
+                                        break;
+                                    case PointerResourceRecord ptrRecord:
+                                        value = ptrRecord.PointerDomainName.ToString();
+                                        break;
+                                    case MailExchangeResourceRecord mxRecord:
+                                        value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
+                                        break;
+                                    case NameServerResourceRecord nsRecord:
+                                        value = nsRecord.NSDomainName.ToString();
+                                        break;
+                                    case TextResourceRecord txtRecord:
+                                        value = txtRecord.ToStringTextData();
+                                        break;
+                                }
+
+                                recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
+                            }
+                        }));
+                    }
+                    else
+                    {
+                        recordGridView.Rows.Clear();
+
+                        if (masterFile == null)
+                        {
+                            Debug.WriteLine("MasterFile is null.");
+                            return;
                         }
 
-                        recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
+                        FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                        IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
+
+                        if (entries == null)
+                        {
+                            Debug.WriteLine("Entries is null.");
+                            return;
+                        }
+
+                        foreach (var entry in entries)
+                        {
+                            string domain = entry.Name.ToString();
+                            string initialTtl = entry.TimeToLive.ToString();
+
+                            TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
+                            TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
+
+                            string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
+
+                            string value = string.Empty;
+                            string type = entry.Type.ToString();
+
+                            switch (entry)
+                            {
+                                case IPAddressResourceRecord ipAddressRecord:
+                                    value = ipAddressRecord.IPAddress.ToString();
+                                    break;
+                                case CanonicalNameResourceRecord cnameRecord:
+                                    value = cnameRecord.CanonicalDomainName.ToString();
+                                    break;
+                                case PointerResourceRecord ptrRecord:
+                                    value = ptrRecord.PointerDomainName.ToString();
+                                    break;
+                                case MailExchangeResourceRecord mxRecord:
+                                    value = $"{mxRecord.Preference} {mxRecord.ExchangeDomainName}";
+                                    break;
+                                case NameServerResourceRecord nsRecord:
+                                    value = nsRecord.NSDomainName.ToString();
+                                    break;
+                                case TextResourceRecord txtRecord:
+                                    value = txtRecord.ToStringTextData();
+                                    break;
+                            }
+
+                            recordGridView.Rows.Add(domain, initialTtl, formattedRemainingTtl, value, type);
+                        }
                     }
                 }
                 catch (Exception ex)
@@ -135,7 +198,7 @@ namespace DNS_Simulation
                     {
                         serverLog.Invoke(new Action(() =>
                         {
-                            serverLog.Items.Insert(0, $"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
+                            AddServerLogItemAsync($"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
                         }));
                     }
                 };
@@ -160,131 +223,20 @@ namespace DNS_Simulation
                     {
                         serverLog.Invoke(new Action(() =>
                         {
-                            serverLog.Items.Insert(0, $"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
+                            AddServerLogItemAsync($"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
                         }));
                     }
                 };
 
                 server1.Responded += async (sender, s) =>
                 {
-                    try
-                    {
-                        if (s.Request == null || s.Response == null)
-                        {
-                            Debug.WriteLine("Request or Response is null in server1.Responded event.");
-                            return;
-                        }
+                    await Task.Run(() => HandleRespondedAsync(sender, s, masterFile, isTest));
 
-                        IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
-
-                        if (answers.Count > 0)
-                        {
-                            // Answers found in the master file
-                        }
-                        else
-                        {
-                            await resolver.Resolve(s.Request);
-                            if (s.Response.AnswerRecords.Count > 0)
-                            {
-                                foreach (var response in s.Response.AnswerRecords)
-                                {
-                                    switch (response)
-                                    {
-                                        case IPAddressResourceRecord ipAddressRecord:
-                                            masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
-                                            break;
-                                        case CanonicalNameResourceRecord cnameRecord:
-                                            masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
-                                            break;
-                                        case MailExchangeResourceRecord mxRecord:
-                                            masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
-                                            break;
-                                        case NameServerResourceRecord nsRecord:
-                                            masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
-                                            break;
-                                        case TextResourceRecord txtRecord:
-                                            masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
-                                            break;
-                                    }
-
-                                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Response: {response}")));
-                                }
-                            }
-                            else
-                            {
-                                serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error in server1.Responded event: {ex.Message}");
-                    }
-                    finally
-                    {
-                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile, isTest)));
-                    }
                 };
 
                 server2.Responded += async (sender, s) =>
                 {
-                    try
-                    {
-                        if (s.Request == null || s.Response == null)
-                        {
-                            Debug.WriteLine("Request or Response is null in server2.Responded event.");
-                            return;
-                        }
-
-                        IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
-
-                        if (answers.Count > 0)
-                        {
-                            // Answers found in the master file
-                        }
-                        else
-                        {
-                            await resolver.Resolve(s.Request);
-                            if (s.Response.AnswerRecords.Count > 0)
-                            {
-                                foreach (var response in s.Response.AnswerRecords)
-                                {
-                                    switch (response)
-                                    {
-                                        case IPAddressResourceRecord ipAddressRecord:
-                                            masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
-                                            break;
-                                        case CanonicalNameResourceRecord cnameRecord:
-                                            masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
-                                            break;
-                                        case MailExchangeResourceRecord mxRecord:
-                                            masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
-                                            break;
-                                        case NameServerResourceRecord nsRecord:
-                                            masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
-                                            break;
-                                        case TextResourceRecord txtRecord:
-                                            masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
-                                            break;
-                                    }
-
-                                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Response: {response}")));
-                                }
-                            }
-                            else
-                            {
-                                serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}")));
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        Debug.WriteLine($"Error in server2.Responded event: {ex.Message}");
-                    }
-                    finally
-                    {
-                        recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile, isTest)));
-                    }
+                    await Task.Run(() => HandleRespondedAsync(sender, s, masterFile, isTest));
                 };
 
                 server1.Errored += (sender, s) =>
@@ -295,10 +247,10 @@ namespace DNS_Simulation
                         return;
                     }
 
-                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Error on Server 1: {s.Exception.Message}")));
+                    AddServerLogItemAsync($"Error on Server 1: {s.Exception.Message}");
                 };
 
-                server1.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, "Server 1 is listening...")));
+                AddServerLogItemAsync("Server 1 is listening...");
 
                 server2.Errored += (sender, s) =>
                 {
@@ -308,11 +260,10 @@ namespace DNS_Simulation
                         return;
                     }
 
-                    serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, $"Error on Server 2: {s.Exception.Message}")));
+                    AddServerLogItem($"Error on Server 2: {s.Exception.Message}");
                 };
 
-                server2.Listening += (sender, s) => serverLog.Invoke(new Action(() => serverLog.Items.Insert(0, "Server 2 is listening...")));
-
+                AddServerLogItem("Server 2 is listening...");
                 List<IPEndPoint> serverEndpoints = new();
                 IPAddress? serverIpAddressLan = GetLocalIPAddress();
 
@@ -360,14 +311,92 @@ namespace DNS_Simulation
                 {
                     serverLog.Invoke(new Action(() =>
                     {
-                        serverLog.Items.Insert(0, $"Server 1 received {server1RequestCount} requests.");
-                        serverLog.Items.Insert(0, $"Server 2 received {server2RequestCount} requests.");
+                        AddServerLogItem($"Server 1 received {server1RequestCount} requests.");
+                        AddServerLogItem($"Server 2 received {server2RequestCount} requests.");
                     }));
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error starting server: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        private void AddServerLogItemAsync(string message)
+        {
+            Task.Run(() => AddServerLogItem(message));
+        }
+
+        private void AddServerLogItem(string message)
+        {
+            serverLog.Invoke(new Action(() =>
+            {
+                serverLog.Items.Insert(0, message);
+                if (serverLog.Items.Count > MaxServerLogItems)
+                {
+                    serverLog.Items.Clear();
+                }
+            }));
+        }
+
+        private async Task HandleRespondedAsync(object sender, DnsServer.RespondedEventArgs s, CustomMasterFile masterFile, bool isTest)
+        {
+            try
+            {
+                if (s.Request == null || s.Response == null)
+                {
+                    Debug.WriteLine("Request or Response is null in Responded event.");
+                    return;
+                }
+
+                IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
+                if (answers.Count > 0)
+                {
+                    // Answers found in the master file
+                }
+                else
+                {
+                    await resolver.Resolve(s.Request);
+                    if (s.Response.AnswerRecords.Count > 0)
+                    {
+                        foreach (var response in s.Response.AnswerRecords)
+                        {
+                            switch (response)
+                            {
+                                case IPAddressResourceRecord ipAddressRecord:
+                                    masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                    break;
+                                case CanonicalNameResourceRecord cnameRecord:
+                                    masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                    break;
+                                case MailExchangeResourceRecord mxRecord:
+                                    masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                    break;
+                                case NameServerResourceRecord nsRecord:
+                                    masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                    break;
+                                case TextResourceRecord txtRecord:
+                                    masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                    break;
+                            }
+
+                            AddServerLogItemAsync($"Response: {response}");
+                        }
+                    }
+                    else
+                    {
+                        AddServerLogItemAsync($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine($"Error in Responded event: {ex.Message}");
+            }
+            finally
+            {
+                recordGridView.Invoke(new Action(() => UpdateRecordGridView(masterFile, isTest)));
             }
         }
 
