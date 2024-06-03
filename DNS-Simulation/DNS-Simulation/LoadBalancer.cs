@@ -1,69 +1,35 @@
-﻿using System.Collections.Concurrent;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Threading;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 using Ae.Dns.Client;
 using Ae.Dns.Client.Exceptions;
 using Ae.Dns.Protocol;
-using Ae.Dns.Protocol.Enums;
+using DNS.Server;
 
 namespace DNS_Simulation
 {
-    public class DnsClientPool
+    public partial class LoadBalancer : Form
     {
-        private readonly ConcurrentBag<DnsUdpClient> _clientPool;
-        private readonly Func<DnsUdpClient> _clientFactory;
-        private readonly int _maxPoolSize;
+        private readonly ConcurrentQueue<DnsClientPool> _clientPools;
+        private int _currentPoolIndex;
+        private readonly object _lock = new object();
+        private int MaxLogItems = 500;
 
-        public DnsClientPool(int maxPoolSize, Func<DnsUdpClient> clientFactory)
+        public LoadBalancer()
         {
-            _clientPool = new ConcurrentBag<DnsUdpClient>();
-            _clientFactory = clientFactory;
-            _maxPoolSize = maxPoolSize;
         }
-
-        public DnsUdpClient GetClient()
-        {
-            if (_clientPool.TryTake(out var client))
-            {
-                return client;
-            }
-            return _clientFactory();
-        }
-
-        public void ReturnClient(DnsUdpClient client)
-        {
-            if (_clientPool.Count < _maxPoolSize)
-            {
-                _clientPool.Add(client);
-            }
-            else
-            {
-                client.Dispose();
-            }
-        }
-    }
-
-    public class LoadBalancer
-    {
-        private readonly DnsClientPool _dnsClientPool;
-        private readonly List<IPEndPoint> _servers;
 
         public LoadBalancer(List<IPEndPoint> servers, int maxPoolSize)
         {
-            _servers = servers;
-            _dnsClientPool = new DnsClientPool(maxPoolSize, () => CreateDnsUdpClient());
-        }
-
-        private DnsUdpClient CreateDnsUdpClient()
-        {
-            var endpoint = _servers[new Random().Next(_servers.Count)];
-            var options = new DnsUdpClientOptions
-            {
-                Endpoint = endpoint,
-                Timeout = TimeSpan.FromSeconds(10) // Adjust the timeout as needed
-            };
-            return new DnsUdpClient(options);
+            _clientPools = new ConcurrentQueue<DnsClientPool>(servers.Select(server => new DnsClientPool(maxPoolSize, server)));
+            InitializeComponent();
         }
 
         public async Task StartAsync(IPAddress ipAddress, int port)
@@ -112,7 +78,15 @@ namespace DNS_Simulation
                     }
                 };
 
-                var dnsClient = _dnsClientPool.GetClient();
+                // Get the next available client pool using round-robin
+                if (!_clientPools.TryDequeue(out var selectedPool))
+                {
+                    // Handle the case when no client pool is available
+                    // You can choose to return an error response or wait for a pool to become available
+                    return;
+                }
+
+                var dnsClient = selectedPool.GetClient();
                 try
                 {
                     var response = await dnsClient.Query(serverQuery, CancellationToken.None);
@@ -137,7 +111,8 @@ namespace DNS_Simulation
                 }
                 finally
                 {
-                    _dnsClientPool.ReturnClient(dnsClient);
+                    selectedPool.ReturnClient(dnsClient);
+                    _clientPools.Enqueue(selectedPool);
                 }
             }
             catch (Exception ex)
@@ -145,6 +120,90 @@ namespace DNS_Simulation
                 // Handle the exception gracefully
                 Debug.WriteLine($"Error processing request: {ex.Message}");
             }
+        }
+
+        private void clearButton_Click(object sender, EventArgs e)
+        {
+            loadBalanceLog.Items.Clear();
+        }
+
+        public void HandleRequestReceived(object sender, Server.RequestReceivedEventArgs args)
+        {
+            Task.Run(() => AddLoadBalanceLogItem(args.RequestArgs, args.ServerName));
+        }
+
+        private void AddLoadBalanceLogItem(DnsServer.RequestedEventArgs args, string serverName)
+        {
+            var remoteEndpoint = args.Remote;
+            var requestDomain = args.Request.Questions[0]?.Name?.ToString();
+
+            string message = $"Request from {remoteEndpoint.Address}:{remoteEndpoint.Port} for {requestDomain} - handling by {serverName}";
+
+            if (loadBalanceLog.InvokeRequired)
+            {
+                loadBalanceLog.Invoke(new Action(() =>
+                {
+                    InsertLogItem(message);
+                }));
+            }
+            else
+            {
+                InsertLogItem(message);
+            }
+        }
+
+        private void InsertLogItem(string message)
+        {
+            loadBalanceLog.Items.Insert(0, message);
+            if (loadBalanceLog.Items.Count > MaxLogItems)
+            {
+                loadBalanceLog.Items.RemoveAt(loadBalanceLog.Items.Count - 1);
+            }
+        }
+    }
+
+    public class DnsClientPool
+    {
+        private readonly ConcurrentBag<DnsUdpClient> _clientPool;
+        private readonly int _maxPoolSize;
+        private readonly IPEndPoint _serverEndpoint;
+
+        public DnsClientPool(int maxPoolSize, IPEndPoint serverEndpoint)
+        {
+            _clientPool = new ConcurrentBag<DnsUdpClient>();
+            _maxPoolSize = maxPoolSize;
+            _serverEndpoint = serverEndpoint;
+        }
+
+        public DnsUdpClient GetClient()
+        {
+            if (_clientPool.TryTake(out var client))
+            {
+                return client;
+            }
+            return CreateDnsUdpClient();
+        }
+
+        public void ReturnClient(DnsUdpClient client)
+        {
+            if (_clientPool.Count < _maxPoolSize)
+            {
+                _clientPool.Add(client);
+            }
+            else
+            {
+                client.Dispose();
+            }
+        }
+
+        private DnsUdpClient CreateDnsUdpClient()
+        {
+            var options = new DnsUdpClientOptions
+            {
+                Endpoint = _serverEndpoint,
+                Timeout = TimeSpan.FromSeconds(10)
+            };
+            return new DnsUdpClient(options);
         }
     }
 }

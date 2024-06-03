@@ -112,3 +112,4 @@ E:\ThnBih_HK4\LTMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Rel
 E:\ThnBih_HK4\LTMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.pdb
 E:\ThnBih_HK4\LTMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.genruntimeconfig.cache
 E:\ThnBih_HK4\LTMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\ref\DNS-Simulation.dll
+C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.LoadBalancer.resources

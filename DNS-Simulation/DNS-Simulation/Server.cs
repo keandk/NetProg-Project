@@ -8,6 +8,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
+using Ae.Dns.Protocol;
 
 namespace DNS_Simulation
 {
@@ -20,6 +21,7 @@ namespace DNS_Simulation
         private int server1RequestCount;
         private int server2RequestCount;
         private const int MaxServerLogItems = 500;
+        public event EventHandler<RequestReceivedEventArgs> RequestReceived;
 
         public Server()
         {
@@ -196,10 +198,13 @@ namespace DNS_Simulation
                     }
                     else
                     {
+                        string message = $"Server 1";
+                        RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
                         serverLog.Invoke(new Action(() =>
                         {
-                            AddServerLogItemAsync($"DNS request received by Server 1 from: {remoteEndpoint} for {requestDomain}");
+                            AddServerLogItemAsync($"Handling request from: {remoteEndpoint} for {requestDomain}");
                         }));
+
                     }
                 };
 
@@ -221,9 +226,11 @@ namespace DNS_Simulation
                     }
                     else
                     {
+                        string message = $"Server 2";
+                        RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
                         serverLog.Invoke(new Action(() =>
                         {
-                            AddServerLogItemAsync($"DNS request received by Server 2 from: {remoteEndpoint} for {requestDomain}");
+                            AddServerLogItemAsync($"Handling request from: {remoteEndpoint} for {requestDomain}");
                         }));
                     }
                 };
@@ -294,9 +301,14 @@ namespace DNS_Simulation
                     return;
                 }
 
-                int poolSize = 10;
-                loadBalancer = new LoadBalancer(serverEndpoints, poolSize);
-                //loadBalancer = new LoadBalancer(serverEndpoints);
+                int pool = 10;
+                loadBalancer = new LoadBalancer(serverEndpoints, pool);
+                //loadBalancerInstance = new LoadBalancer();
+
+                server1.Requested += (sender, args) => loadBalancer.HandleRequestReceived(this, new RequestReceivedEventArgs(args, "Server 1"));
+                server2.Requested += (sender, args) => loadBalancer.HandleRequestReceived(this, new RequestReceivedEventArgs(args, "Server 2"));
+
+                loadBalancer.Show();
 
                 IPAddress? loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddressLan;
                 int loadBalancerPort = 8080;
@@ -319,6 +331,18 @@ namespace DNS_Simulation
             catch (Exception ex)
             {
                 MessageBox.Show($"Error starting server: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        public class RequestReceivedEventArgs : EventArgs
+        {
+            public DnsServer.RequestedEventArgs RequestArgs { get; }
+            public string ServerName { get; }
+
+            public RequestReceivedEventArgs(DnsServer.RequestedEventArgs requestArgs, string serverName)
+            {
+                RequestArgs = requestArgs;
+                ServerName = serverName;
             }
         }
 
