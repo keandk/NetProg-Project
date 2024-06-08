@@ -1,5 +1,4 @@
 ﻿using DNS.Server;
-using Ae.Dns.Server;
 using DNS.Protocol;
 using DNS.Protocol.ResourceRecords;
 using System.Net;
@@ -8,7 +7,6 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
-using Ae.Dns.Protocol;
 
 namespace DNS_Simulation
 {
@@ -18,10 +16,9 @@ namespace DNS_Simulation
         private DnsServer server2;
         private IRequestResolver resolver;
         private LoadBalancer loadBalancer;
-        private int server1RequestCount;
-        private int server2RequestCount;
         private const int MaxServerLogItems = 500;
         public event EventHandler<RequestReceivedEventArgs> RequestReceived;
+        public event EventHandler<IPAddressModeChangedEventArgs> IPAddressModeChanged;
 
         public Server()
         {
@@ -192,20 +189,12 @@ namespace DNS_Simulation
                     var remoteEndpoint = args.Remote;
                     var requestDomain = request.Questions[0]?.Name?.ToString();
 
-                    if (isTest)
+                    string message = $"Server 1";
+                    RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
+                    serverLog.Invoke(new Action(() =>
                     {
-                        Interlocked.Increment(ref server1RequestCount);
-                    }
-                    else
-                    {
-                        string message = $"Server 1";
-                        RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
-                        serverLog.Invoke(new Action(() =>
-                        {
-                            AddServerLogItemAsync($"Handling request from: {remoteEndpoint} for {requestDomain}");
-                        }));
-
-                    }
+                        AddServerLogItemAsync($"Server 1 is handling request from: {remoteEndpoint} for {requestDomain}");
+                    }));
                 };
 
                 server2.Requested += (s, args) =>
@@ -220,19 +209,13 @@ namespace DNS_Simulation
                     var remoteEndpoint = args.Remote;
                     var requestDomain = request.Questions[0]?.Name?.ToString();
 
-                    if (isTest)
+                    string message = $"Server 2";
+                    RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
+                    serverLog.Invoke(new Action(() =>
                     {
-                        Interlocked.Increment(ref server2RequestCount);
-                    }
-                    else
-                    {
-                        string message = $"Server 2";
-                        RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
-                        serverLog.Invoke(new Action(() =>
-                        {
-                            AddServerLogItemAsync($"Handling request from: {remoteEndpoint} for {requestDomain}");
-                        }));
-                    }
+                        AddServerLogItemAsync($"Server 2 is handling request from: {remoteEndpoint} for {requestDomain}");
+                    }));
+
                 };
 
                 server1.Responded += async (sender, s) =>
@@ -280,6 +263,9 @@ namespace DNS_Simulation
                     serverEndpoints.Add(new IPEndPoint(ip, 8081));
                     serverEndpoints.Add(new IPEndPoint(ip, 8082));
                     ipAddressLabel.Text = $"Load Balancer: {ip}:8080";
+
+                    string loadBalancerIpAddress = "127.0.0.1";
+                    IPAddressModeChanged?.Invoke(this, new IPAddressModeChangedEventArgs { LoadBalancerIPAddress = loadBalancerIpAddress, LoadBalancerPort = 8080 });
                 }
                 else if (lanRadioButton.Checked)
                 {
@@ -288,6 +274,9 @@ namespace DNS_Simulation
                         serverEndpoints.Add(new IPEndPoint(serverIpAddressLan, 8081));
                         serverEndpoints.Add(new IPEndPoint(serverIpAddressLan, 8082));
                         ipAddressLabel.Text = $"Load Balancer: {serverIpAddressLan}:8080";
+
+                        string loadBalancerIpAddress = serverIpAddressLan.ToString();
+                        IPAddressModeChanged?.Invoke(this, new IPAddressModeChangedEventArgs { LoadBalancerIPAddress = loadBalancerIpAddress, LoadBalancerPort = 8080 });
                     }
                     else
                     {
@@ -319,19 +308,17 @@ namespace DNS_Simulation
 
                 await Task.WhenAll(loadBalancerTask, listenTask1, listenTask2);
 
-                if (isTest)
-                {
-                    serverLog.Invoke(new Action(() =>
-                    {
-                        AddServerLogItem($"Server 1 received {server1RequestCount} requests.");
-                        AddServerLogItem($"Server 2 received {server2RequestCount} requests.");
-                    }));
-                }
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error starting server: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+
+        public class IPAddressModeChangedEventArgs : EventArgs
+        {
+            public string LoadBalancerIPAddress { get; set; }
+            public int LoadBalancerPort { get; set; }
         }
 
         public class RequestReceivedEventArgs : EventArgs
@@ -469,7 +456,7 @@ namespace DNS_Simulation
 
         private void newClient_Click(object sender, EventArgs e)
         {
-            Client clientForm = new();
+            Client clientForm = new Client(this);
             clientForm.Show();
         }
 

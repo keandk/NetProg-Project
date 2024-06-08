@@ -14,10 +14,18 @@ namespace DNS_Simulation
         private bool dnsClientInitialized = false;
         private IPEndPoint loadBalancerEndpoint;
 
-        public Client()
+        public Client(Server server)
         {
             InitializeComponent();
             type.SelectedIndex = 0;
+            server.IPAddressModeChanged += Server_IPAddressModeChanged;
+        }
+
+        private void Server_IPAddressModeChanged(object sender, Server.IPAddressModeChangedEventArgs e)
+        {
+            loadBalancerIpAddressTextBox.Text = e.LoadBalancerIPAddress;
+            loadBalancerPortTextBox.Text = e.LoadBalancerPort.ToString();
+            InitializeDnsClient();
         }
 
         private void InitializeDnsClient()
@@ -258,10 +266,7 @@ namespace DNS_Simulation
         {
             base.OnFormClosing(e);
 
-            if (dnsClient != null)
-            {
-                dnsClient.Dispose();
-            }
+            dnsClient?.Dispose();
         }
     }
 }

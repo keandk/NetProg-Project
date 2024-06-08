@@ -1,25 +1,20 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 using Ae.Dns.Client;
 using Ae.Dns.Client.Exceptions;
 using Ae.Dns.Protocol;
+using Ae.Dns.Protocol.Enums;
 using DNS.Server;
 
 namespace DNS_Simulation
 {
     public partial class LoadBalancer : Form
     {
+        private readonly List<string> _serverAddresses;
+        private int _currentIndex;
         private readonly ConcurrentQueue<DnsClientPool> _clientPools;
-        private int _currentPoolIndex;
-        private readonly object _lock = new object();
         private int MaxLogItems = 500;
 
         public LoadBalancer()
@@ -28,11 +23,13 @@ namespace DNS_Simulation
 
         public LoadBalancer(List<IPEndPoint> servers, int maxPoolSize)
         {
+            _serverAddresses = servers.Select(server => $"{server.Address}:{server.Port}").ToList();
+            _currentIndex = 0;
             _clientPools = new ConcurrentQueue<DnsClientPool>(servers.Select(server => new DnsClientPool(maxPoolSize, server)));
             InitializeComponent();
         }
 
-        public async Task StartAsync(IPAddress ipAddress, int port)
+        public async Task StartAsync(IPAddress? ipAddress, int port)
         {
             var endpoint = new IPEndPoint(ipAddress, port);
             using (var udpClient = new UdpClient(endpoint))
@@ -78,11 +75,12 @@ namespace DNS_Simulation
                     }
                 };
 
-                // Get the next available client pool using round-robin
-                if (!_clientPools.TryDequeue(out var selectedPool))
+                // Get the next available server using round-robin
+                var selectedServer = GetNextServerAddress();
+                var selectedPool = _clientPools.FirstOrDefault(pool => $"{pool.ServerEndpoint.Address}:{pool.ServerEndpoint.Port}" == selectedServer);
+                if (selectedPool == null)
                 {
-                    // Handle the case when no client pool is available
-                    // You can choose to return an error response or wait for a pool to become available
+                    // Handle the case when the selected server is not found in the client pools
                     return;
                 }
 
@@ -99,20 +97,77 @@ namespace DNS_Simulation
                 }
                 catch (DnsClientTimeoutException ex)
                 {
-                    Console.WriteLine("Timeout");
                     // Handle DNS client timeout exception
+                    Debug.WriteLine($"Timeout occurred while querying server {selectedServer}: {ex.Message}");
+
                     // Retry with a different server or return an appropriate response
+                    var retryServer = GetNextServerAddress();
+                    Debug.WriteLine($"Retrying with server {retryServer}");
+
+                    var retryServerParts = retryServer.Split(':');
+                    var retryServerAddress = IPAddress.Parse(retryServerParts[0]);
+                    var retryServerPort = int.Parse(retryServerParts[1]);
+                    var retryServerEndpoint = new IPEndPoint(retryServerAddress, retryServerPort);
+
+                    dnsClient = selectedPool.GetClient();
+                    try
+                    {
+                        var retryResponse = await dnsClient.Query(serverQuery, CancellationToken.None);
+
+                        var retryResponseBytes = new byte[udpClient.Client.ReceiveBufferSize];
+                        offset = 0;
+                        retryResponse.WriteBytes(retryResponseBytes, ref offset);
+
+                        await udpClient.SendAsync(retryResponseBytes, offset, result.RemoteEndPoint);
+                    }
+                    catch (Exception retryEx)
+                    {
+                        Debug.WriteLine($"Error occurred while retrying with server {retryServer}: {retryEx.Message}");
+                        // Handle the retry exception and return an appropriate response
+                        var errorResponse = new DnsMessage
+                        {
+                            Header = new DnsHeader
+                            {
+                                Id = header.Id,
+                                ResponseCode = DnsResponseCode.ServFail,
+                            }
+                        };
+
+                        var errorResponseBytes = new byte[udpClient.Client.ReceiveBufferSize];
+                        offset = 0;
+                        errorResponse.WriteBytes(errorResponseBytes, ref offset);
+
+                        await udpClient.SendAsync(errorResponseBytes, offset, result.RemoteEndPoint);
+                    }
+                    finally
+                    {
+                        selectedPool.ReturnClient(dnsClient);
+                    }
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Error");
                     // Handle other exceptions
+                    Debug.WriteLine($"Error occurred while processing request: {ex.Message}");
+
                     // Log the error and return an appropriate response
+                    var errorResponse = new DnsMessage
+                    {
+                        Header = new DnsHeader
+                        {
+                            Id = header.Id,
+                            ResponseCode = DnsResponseCode.ServFail,
+                        }
+                    };
+
+                    var errorResponseBytes = new byte[udpClient.Client.ReceiveBufferSize];
+                    offset = 0;
+                    errorResponse.WriteBytes(errorResponseBytes, ref offset);
+
+                    await udpClient.SendAsync(errorResponseBytes, offset, result.RemoteEndPoint);
                 }
                 finally
                 {
                     selectedPool.ReturnClient(dnsClient);
-                    _clientPools.Enqueue(selectedPool);
                 }
             }
             catch (Exception ex)
@@ -120,6 +175,13 @@ namespace DNS_Simulation
                 // Handle the exception gracefully
                 Debug.WriteLine($"Error processing request: {ex.Message}");
             }
+        }
+
+        private string GetNextServerAddress()
+        {
+            string address = _serverAddresses[_currentIndex];
+            _currentIndex = (_currentIndex + 1) % _serverAddresses.Count;
+            return address;
         }
 
         private void clearButton_Click(object sender, EventArgs e)
@@ -167,6 +229,8 @@ namespace DNS_Simulation
         private readonly ConcurrentBag<DnsUdpClient> _clientPool;
         private readonly int _maxPoolSize;
         private readonly IPEndPoint _serverEndpoint;
+
+        public IPEndPoint ServerEndpoint => _serverEndpoint;
 
         public DnsClientPool(int maxPoolSize, IPEndPoint serverEndpoint)
         {

@@ -7,6 +7,14 @@
       "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
+      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
       "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\loadbalancer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\loadbalancer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
@@ -23,14 +31,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "LoadBalancer.cs",
-              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LoadBalancer.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\LoadBalancer.cs",
-              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LoadBalancer.cs",
-              "RelativeToolTip": "DNS-Simulation\\LoadBalancer.cs",
-              "ViewState": "AQIAADgAAAAAAAAAAAAkwFcAAAAAAAAA",
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Program.cs",
+              "RelativeDocumentMoniker": "DNS-Simulation\\Program.cs",
+              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Program.cs",
+              "RelativeToolTip": "DNS-Simulation\\Program.cs",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAAQAAAAVAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-03T08:15:29.587Z",
+              "WhenOpened": "2024-06-08T07:22:42.033Z",
               "EditorCaption": ""
             },
             {
@@ -41,9 +49,35 @@
               "RelativeDocumentMoniker": "DNS-Simulation\\Client.cs",
               "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Client.cs",
               "RelativeToolTip": "DNS-Simulation\\Client.cs",
-              "ViewState": "AQIAAGAAAAAAAAAAAAAIwGUAAAAqAAAA",
+              "ViewState": "AQIAAAAAAAAAAAAAAAAAAB0AAAAAAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-05-29T07:56:28.041Z",
+              "WhenOpened": "2024-06-08T06:47:01.673Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Server.cs",
+              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Server.cs",
+              "RelativeDocumentMoniker": "DNS-Simulation\\Server.cs",
+              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Server.cs",
+              "RelativeToolTip": "DNS-Simulation\\Server.cs",
+              "ViewState": "AQIAAO0AAAAAAAAAAAAUwM0BAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-08T06:22:08.849Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "LoadBalancer.cs",
+              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LoadBalancer.cs",
+              "RelativeDocumentMoniker": "DNS-Simulation\\LoadBalancer.cs",
+              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LoadBalancer.cs",
+              "RelativeToolTip": "DNS-Simulation\\LoadBalancer.cs",
+              "ViewState": "AQIAAIIAAAAAAAAAAAAkwAkAAAAAAAAA",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2024-06-08T06:18:08.349Z",
               "EditorCaption": ""
             }
           ]
