@@ -13,6 +13,8 @@ namespace DNS_Simulation
             ApplicationConfiguration.Initialize();
             Server server = new();
             server.Show();
+            Client client = new(server);
+            client.Show();
             Application.Run();
         }
     }

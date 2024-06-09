@@ -33,7 +33,7 @@ namespace DNS_Simulation
                 {
                     if (recordGridView.InvokeRequired)
                     {
-                        recordGridView.BeginInvoke(new Action(() =>
+                        _ = recordGridView.BeginInvoke(new Action(() =>
                         {
                             recordGridView.Rows.Clear();
 
@@ -238,9 +238,11 @@ namespace DNS_Simulation
                     }
 
                     AddServerLogItemAsync($"Error on Server 1: {s.Exception.Message}");
+                    Logger.Log($"Error on Server 1: {s.Exception.Message}");
                 };
 
                 AddServerLogItemAsync("Server 1 is listening...");
+                Logger.Log("Server 1 is listening...");
 
                 server2.Errored += (sender, s) =>
                 {
@@ -251,9 +253,11 @@ namespace DNS_Simulation
                     }
 
                     AddServerLogItem($"Error on Server 2: {s.Exception.Message}");
+                    Logger.Log($"Error on Server 2: {s.Exception.Message}");
                 };
 
                 AddServerLogItem("Server 2 is listening...");
+                Logger.Log("Server 2 is listening...");
                 List<IPEndPoint> serverEndpoints = new();
                 IPAddress? serverIpAddressLan = GetLocalIPAddress();
 
@@ -301,6 +305,9 @@ namespace DNS_Simulation
 
                 IPAddress? loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddressLan;
                 int loadBalancerPort = 8080;
+
+                IPAddressModeChanged?.Invoke(this, new IPAddressModeChangedEventArgs { LoadBalancerIPAddress = loadBalancerIp.ToString(), LoadBalancerPort = loadBalancerPort });
+
                 Task loadBalancerTask = Task.Run(() => loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort));
 
                 Task listenTask1 = Task.Run(() => server1.Listen(serverEndpoints[0].Port, serverEndpoints[0].Address));
@@ -393,11 +400,13 @@ namespace DNS_Simulation
                             }
 
                             AddServerLogItemAsync($"Response: {response}");
+                            Logger.Log($"Response: {response}");
                         }
                     }
                     else
                     {
                         AddServerLogItemAsync($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
+                        Logger.Log($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
                     }
                 }
             }
@@ -456,7 +465,7 @@ namespace DNS_Simulation
 
         private void newClient_Click(object sender, EventArgs e)
         {
-            Client clientForm = new Client(this);
+            Client clientForm = new(this);
             clientForm.Show();
         }
 

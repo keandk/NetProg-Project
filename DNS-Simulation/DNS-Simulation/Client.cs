@@ -235,6 +235,7 @@ namespace DNS_Simulation
                             responseBox.Items.Insert(0, response.Answers[i].ToString());
                             responseBox.Items.Insert(0, time);
                             server.Text = serverAddress;
+                            Logger.Log($"[{time}] {response.Answers[i]}");
                         }
                     }
                     else
@@ -243,6 +244,7 @@ namespace DNS_Simulation
                         responseBox.Items.Insert(0, $"No response for requested record type {selectedRecordType} for {domainInput.Text}");
                         responseBox.Items.Insert(0, time);
                         server.Text = serverAddress;
+                        Logger.Log($"[{time}] No response for requested record type {selectedRecordType} for {domainInput.Text}");
                     }
 
                     queryTime.Text = $"{elapsedMs} ms";
@@ -253,6 +255,7 @@ namespace DNS_Simulation
                 responseBox.Items.Insert(0, "-------------------------");
                 responseBox.Items.Insert(0, $"Error: {ex.Message}");
                 responseBox.Items.Insert(0, time);
+                Logger.Log($"[{time}] Error: {ex.Message}");
             }
         }
 
