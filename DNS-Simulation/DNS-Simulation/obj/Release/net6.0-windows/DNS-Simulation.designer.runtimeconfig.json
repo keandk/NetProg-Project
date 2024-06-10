@@ -16,8 +16,8 @@
       }
     ],
     "additionalProbingPaths": [
-      "C:\\Users\\luutr\\.dotnet\\store\\|arch|\\|tfm|",
-      "C:\\Users\\luutr\\.nuget\\packages"
+      "C:\\Users\\THANH BINH\\.dotnet\\store\\|arch|\\|tfm|",
+      "C:\\Users\\THANH BINH\\.nuget\\packages"
     ],
     "configProperties": {
       "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
