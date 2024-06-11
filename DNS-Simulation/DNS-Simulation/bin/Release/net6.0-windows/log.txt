@@ -32,3 +32,17 @@
 [2024-06-10 08:41:54] Server 2 is listening...
 [2024-06-10 08:42:04] Response: {Name=facebook.com, Type=A, Class=IN, TimeToLive=00:00:48, DataLength=4, IPAddress=163.70.159.35}
 [2024-06-10 08:42:04] [6/10/2024 8:42:04 AM] Name: facebook.com Type: A Class: IN TTL: 48 Resource: 163.70.159.35
+[2024-06-10 08:55:37] Server 1 is listening...
+[2024-06-10 08:55:37] Server 2 is listening...
+[2024-06-10 08:55:44] Response: {Name=poe.com, Type=A, Class=IN, TimeToLive=00:02:12, DataLength=4, IPAddress=162.159.152.17}
+[2024-06-10 08:55:44] Response: {Name=poe.com, Type=A, Class=IN, TimeToLive=00:02:12, DataLength=4, IPAddress=162.159.153.247}
+[2024-06-10 08:55:44] [6/10/2024 8:55:44 AM] Name: poe.com Type: A Class: IN TTL: 132 Resource: 162.159.152.17
+[2024-06-10 08:55:44] [6/10/2024 8:55:44 AM] Name: poe.com Type: A Class: IN TTL: 132 Resource: 162.159.153.247
+[2024-06-11 18:06:45] Server 1 is listening...
+[2024-06-11 18:06:45] Server 2 is listening...
+[2024-06-11 18:06:56] [6/11/2024 6:06:56 PM] Name: nhom3.com Type: A Class: IN TTL: 60 Resource: 127.0.0.1
+[2024-06-11 18:07:33] [6/11/2024 6:07:33 PM] Name: nhom3.com Type: A Class: IN TTL: 23 Resource: 127.0.0.1
+[2024-06-11 18:07:43] Response: {Name=facebook.com, Type=A, Class=IN, TimeToLive=00:00:07, DataLength=4, IPAddress=163.70.158.35}
+[2024-06-11 18:07:43] [6/11/2024 6:07:43 PM] Name: facebook.com Type: A Class: IN TTL: 7 Resource: 163.70.158.35
+[2024-06-11 18:07:57] [6/11/2024 6:07:57 PM] Name: facebook.com Type: A Class: IN TTL: 7 Resource: 163.70.158.35
+[2024-06-11 18:08:03] [6/11/2024 6:08:03 PM] Name: nhom3.com Type: A Class: IN TTL: 60 Resource: 127.0.0.1

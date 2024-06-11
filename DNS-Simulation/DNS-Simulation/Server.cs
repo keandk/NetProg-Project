@@ -83,6 +83,43 @@ namespace DNS_Simulation
             }
         }
 
+        private IList<IResourceRecord> GetRecordsFromDatabase(string domain, RecordType type)
+        {
+            IList<IResourceRecord> records = new List<IResourceRecord>();
+
+            using (var connection = new SQLiteConnection("Data Source=E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\Namespace.db"))
+            {
+                connection.Open();
+                var selectCommand = new SQLiteCommand("SELECT Domain, InitialTTL, RemainingTTL, Value, Type FROM DnsRecords WHERE Domain = @Domain AND Type = @Type", connection);
+                selectCommand.Parameters.AddWithValue("@Domain", domain);
+                selectCommand.Parameters.AddWithValue("@Type", type.ToString());
+
+                using (var reader = selectCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string recordDomain = reader.GetString(0);
+                        TimeSpan initialTtl = TimeSpan.Parse(reader.GetString(1));
+                        TimeSpan remainingTtl = TimeSpan.Parse(reader.GetString(2));
+                        string value = reader.GetString(3);
+                        RecordType recordType = (RecordType)Enum.Parse(typeof(RecordType), reader.GetString(4));
+
+                        IResourceRecord record = recordType switch
+                        {
+                            RecordType.A => new IPAddressResourceRecord(Domain.FromString(recordDomain), IPAddress.Parse(value), remainingTtl),
+                            RecordType.PTR => new PointerResourceRecord(IPAddress.Parse(recordDomain), Domain.FromString(value), remainingTtl),
+                            _ => throw new NotSupportedException($"Record type {recordType} is not supported"),
+                        };
+
+                        records.Add(record);
+                    }
+                }
+            }
+
+            return records;
+        }
+
+
         private void UpdateRecordGridViewFromDatabase()
         {
             if (recordGridView.InvokeRequired)
@@ -359,14 +396,27 @@ namespace DNS_Simulation
                     return;
                 }
 
-                IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+                //IList<IResourceRecord> answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+                string domain = s.Request.Questions[0].Name.ToString();
+                RecordType type = s.Request.Questions[0].Type;
+
+                // Check database first
+                IList<IResourceRecord> answers = GetRecordsFromDatabase(domain, type);
 
                 if (answers.Count > 0)
                 {
-                    // Answers found in the master file
+                    // Answers found in the database
+                    foreach (var answer in answers)
+                    {
+                        s.Response.AnswerRecords.Add(answer);
+                        AddServerLogItemAsync($"Database Response: {answer}");
+                        Logger.Log($"Database Response: {answer}");
+                    }
                 }
                 else
                 {
+                    answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
                     await resolver.Resolve(s.Request);
                     if (s.Response.AnswerRecords.Count > 0)
                     {
