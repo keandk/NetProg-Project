@@ -5,10 +5,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|e:\\hk4\\laptrinhmangcanban\\netprog-project\\dns-simulation\\dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\server.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|e:\\hk4\\laptrinhmangcanban\\netprog-project\\dns-simulation\\dns-simulation\\loadbalancer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\loadbalancer.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -18,8 +14,16 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 0,
+          "SelectedChildIndex": 2,
           "Children": [
+            {
+              "$type": "Bookmark",
+              "Name": "ST:496669592:0:{bf84ea66-d821-4dba-b1b1-2777d8574775}"
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:479622559:0:{bf84ea66-d821-4dba-b1b1-2777d8574775}"
+            },
             {
               "$type": "Document",
               "DocumentIndex": 0,
@@ -28,22 +32,10 @@
               "RelativeDocumentMoniker": "DNS-Simulation\\Server.cs",
               "ToolTip": "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Server.cs",
               "RelativeToolTip": "DNS-Simulation\\Server.cs",
-              "ViewState": "AQIAAOcBAAAAAAAAAAAQwNEBAAAAAAAA",
+              "ViewState": "AQIAAD4AAAAAAAAAAAAAAE8AAAADAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2024-06-10T15:10:40.559Z",
               "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "LoadBalancer.cs",
-              "DocumentMoniker": "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LoadBalancer.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\LoadBalancer.cs",
-              "ToolTip": "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LoadBalancer.cs",
-              "RelativeToolTip": "DNS-Simulation\\LoadBalancer.cs",
-              "ViewState": "AQIAAAAAAAAAAAAAAAAAABEAAAAmAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-08T06:18:08.349Z"
             }
           ]
         }

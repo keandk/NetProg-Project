@@ -32,15 +32,33 @@ namespace DNS_Simulation
             {
                 connection.Open();
                 string tableCreationQuery = @"
-            CREATE TABLE IF NOT EXISTS DnsRecords (
-                Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                Domain TEXT,
-                InitialTTL TEXT,
-                RemainingTTL TEXT,
-                Value TEXT,
-                Type TEXT
-            )";
+                CREATE TABLE IF NOT EXISTS DnsRecords (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Domain TEXT,
+                    InitialTTL TEXT,
+                    RemainingTTL TEXT,
+                    Value TEXT,
+                    Type TEXT
+                )";
                 using (var command = new SQLiteCommand(tableCreationQuery, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
+
+            using (var connection1 = new SQLiteConnection("Data Source = E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\Resolver.db"))
+            {
+                connection1.Open();
+                string tableCreationQuery = @"
+                CREATE TABLE IF NOT EXISTS DnsRecords (
+                    Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Domain TEXT,
+                    InitialTTL TEXT,
+                    RemainingTTL TEXT,
+                    Value TEXT,
+                    Type TEXT
+                )";
+                using (var command = new SQLiteCommand(tableCreationQuery, connection1))
                 {
                     command.ExecuteNonQuery();
                 }
@@ -81,6 +99,39 @@ namespace DNS_Simulation
                     transaction.Commit();
                 }
             }
+
+            using (var connection1 = new SQLiteConnection("Data Source=E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\Resolver.db"))
+            {
+                connection1.Open();
+                using (var transaction = connection1.BeginTransaction())
+                {
+                    var deleteCommand = new SQLiteCommand("DELETE FROM DnsRecords", connection1, transaction);
+                    deleteCommand.ExecuteNonQuery();
+                    FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
+                    IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
+
+                    foreach (var entry in entries)
+                    {
+                        string domain = entry.Name.ToString();
+                        string initialTtl = entry.TimeToLive.ToString();
+                        TimeSpan elapsedTime = DateTime.Now - entry.GetTimestampAdded();
+                        TimeSpan remainingTtl = entry.TimeToLive - elapsedTime;
+                        string formattedRemainingTtl = $"{remainingTtl.Minutes:D2}:{remainingTtl.Seconds:D2}";
+                        string value = entry.ToString();
+                        string type = entry.Type.ToString();
+
+                        var insertCommand = new SQLiteCommand("INSERT INTO DnsRecords (Domain, InitialTTL, RemainingTTL, Value, Type) VALUES (@Domain, @InitialTTL, @RemainingTTL, @Value, @Type)", connection1, transaction);
+                        insertCommand.Parameters.AddWithValue("@Domain", domain);
+                        insertCommand.Parameters.AddWithValue("@InitialTTL", initialTtl);
+                        insertCommand.Parameters.AddWithValue("@RemainingTTL", formattedRemainingTtl);
+                        insertCommand.Parameters.AddWithValue("@Value", value);
+                        insertCommand.Parameters.AddWithValue("@Type", type);
+                        insertCommand.ExecuteNonQuery();
+                    }
+
+                    transaction.Commit();
+                }
+            }
         }
 
         private IList<IResourceRecord> GetRecordsFromDatabase(string domain, RecordType type)
@@ -91,6 +142,35 @@ namespace DNS_Simulation
             {
                 connection.Open();
                 var selectCommand = new SQLiteCommand("SELECT Domain, InitialTTL, RemainingTTL, Value, Type FROM DnsRecords WHERE Domain = @Domain AND Type = @Type", connection);
+                selectCommand.Parameters.AddWithValue("@Domain", domain);
+                selectCommand.Parameters.AddWithValue("@Type", type.ToString());
+
+                using (var reader = selectCommand.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string recordDomain = reader.GetString(0);
+                        TimeSpan initialTtl = TimeSpan.Parse(reader.GetString(1));
+                        TimeSpan remainingTtl = TimeSpan.Parse(reader.GetString(2));
+                        string value = reader.GetString(3);
+                        RecordType recordType = (RecordType)Enum.Parse(typeof(RecordType), reader.GetString(4));
+
+                        IResourceRecord record = recordType switch
+                        {
+                            RecordType.A => new IPAddressResourceRecord(Domain.FromString(recordDomain), IPAddress.Parse(value), remainingTtl),
+                            RecordType.PTR => new PointerResourceRecord(IPAddress.Parse(recordDomain), Domain.FromString(value), remainingTtl),
+                            _ => throw new NotSupportedException($"Record type {recordType} is not supported"),
+                        };
+
+                        records.Add(record);
+                    }
+                }
+            }
+
+            using (var connection1 = new SQLiteConnection("Data Source=E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Data\\Resolver.db"))
+            {
+                connection1.Open();
+                var selectCommand = new SQLiteCommand("SELECT Domain, InitialTTL, RemainingTTL, Value, Type FROM DnsRecords WHERE Domain = @Domain AND Type = @Type", connection1);
                 selectCommand.Parameters.AddWithValue("@Domain", domain);
                 selectCommand.Parameters.AddWithValue("@Type", type.ToString());
 
