@@ -52,29 +52,6 @@ namespace DNS_Simulation
 
                 var header = query.Header;
 
-                // Create a new DnsMessage with the extracted header
-                var serverQuery = new DnsMessage
-                {
-                    Header = new DnsHeader
-                    {
-                        Id = header.Id,
-                        IsQueryResponse = header.IsQueryResponse,
-                        OperationCode = header.OperationCode,
-                        AuthoritativeAnswer = header.AuthoritativeAnswer,
-                        Truncation = header.Truncation,
-                        RecursionDesired = header.RecursionDesired,
-                        RecursionAvailable = header.RecursionAvailable,
-                        ResponseCode = header.ResponseCode,
-                        QuestionCount = header.QuestionCount,
-                        AnswerRecordCount = header.AnswerRecordCount,
-                        NameServerRecordCount = header.NameServerRecordCount,
-                        AdditionalRecordCount = header.AdditionalRecordCount,
-                        QueryType = header.QueryType,
-                        QueryClass = header.QueryClass,
-                        Host = header.Host
-                    }
-                };
-
                 // Get the next available server using round-robin
                 var selectedServer = GetNextServerAddress();
                 var selectedPool = _clientPools.FirstOrDefault(pool => $"{pool.ServerEndpoint.Address}:{pool.ServerEndpoint.Port}" == selectedServer);
@@ -87,7 +64,7 @@ namespace DNS_Simulation
                 var dnsClient = selectedPool.GetClient();
                 try
                 {
-                    var response = await dnsClient.Query(serverQuery, CancellationToken.None);
+                    var response = await dnsClient.Query(query, CancellationToken.None);
 
                     var responseBytes = new byte[udpClient.Client.ReceiveBufferSize];
                     offset = 0;
@@ -95,75 +72,10 @@ namespace DNS_Simulation
 
                     await udpClient.SendAsync(responseBytes, offset, result.RemoteEndPoint);
                 }
-                catch (DnsClientTimeoutException ex)
-                {
-                    // Handle DNS client timeout exception
-                    Debug.WriteLine($"Timeout occurred while querying server {selectedServer}: {ex.Message}");
-
-                    // Retry with a different server or return an appropriate response
-                    var retryServer = GetNextServerAddress();
-                    Debug.WriteLine($"Retrying with server {retryServer}");
-
-                    var retryServerParts = retryServer.Split(':');
-                    var retryServerAddress = IPAddress.Parse(retryServerParts[0]);
-                    var retryServerPort = int.Parse(retryServerParts[1]);
-                    var retryServerEndpoint = new IPEndPoint(retryServerAddress, retryServerPort);
-
-                    dnsClient = selectedPool.GetClient();
-                    try
-                    {
-                        var retryResponse = await dnsClient.Query(serverQuery, CancellationToken.None);
-
-                        var retryResponseBytes = new byte[udpClient.Client.ReceiveBufferSize];
-                        offset = 0;
-                        retryResponse.WriteBytes(retryResponseBytes, ref offset);
-
-                        await udpClient.SendAsync(retryResponseBytes, offset, result.RemoteEndPoint);
-                    }
-                    catch (Exception retryEx)
-                    {
-                        Debug.WriteLine($"Error occurred while retrying with server {retryServer}: {retryEx.Message}");
-                        // Handle the retry exception and return an appropriate response
-                        var errorResponse = new DnsMessage
-                        {
-                            Header = new DnsHeader
-                            {
-                                Id = header.Id,
-                                ResponseCode = DnsResponseCode.ServFail,
-                            }
-                        };
-
-                        var errorResponseBytes = new byte[udpClient.Client.ReceiveBufferSize];
-                        offset = 0;
-                        errorResponse.WriteBytes(errorResponseBytes, ref offset);
-
-                        await udpClient.SendAsync(errorResponseBytes, offset, result.RemoteEndPoint);
-                    }
-                    finally
-                    {
-                        selectedPool.ReturnClient(dnsClient);
-                    }
-                }
                 catch (Exception ex)
                 {
-                    // Handle other exceptions
-                    Debug.WriteLine($"Error occurred while processing request: {ex.Message}");
-
-                    // Log the error and return an appropriate response
-                    var errorResponse = new DnsMessage
-                    {
-                        Header = new DnsHeader
-                        {
-                            Id = header.Id,
-                            ResponseCode = DnsResponseCode.ServFail,
-                        }
-                    };
-
-                    var errorResponseBytes = new byte[udpClient.Client.ReceiveBufferSize];
-                    offset = 0;
-                    errorResponse.WriteBytes(errorResponseBytes, ref offset);
-
-                    await udpClient.SendAsync(errorResponseBytes, offset, result.RemoteEndPoint);
+                    // Log the error using a separate logging mechanism
+                    Logger.Log($"Error occurred while processing request: {ex.Message}");
                 }
                 finally
                 {
@@ -172,8 +84,8 @@ namespace DNS_Simulation
             }
             catch (Exception ex)
             {
-                // Handle the exception gracefully
-                Debug.WriteLine($"Error processing request: {ex.Message}");
+                // Log the error using a separate logging mechanism
+                Logger.Log($"Error processing request: {ex.Message}");
             }
         }
 
@@ -189,7 +101,7 @@ namespace DNS_Simulation
             loadBalanceLog.Items.Clear();
         }
 
-        public void HandleRequestReceived(object sender, Server.RequestReceivedEventArgs args)
+        public void HandleRequestReceived(object sender, ServerForm.RequestReceivedEventArgs args)
         {
             Task.Run(() => AddLoadBalanceLogItem(args.RequestArgs, args.ServerName));
         }
@@ -200,6 +112,7 @@ namespace DNS_Simulation
             var requestDomain = args.Request.Questions[0]?.Name?.ToString();
 
             string message = $"Request from {remoteEndpoint.Address}:{remoteEndpoint.Port} for {requestDomain} - handling by {serverName}";
+            Logger.Log(message);
 
             if (loadBalanceLog.InvokeRequired)
             {

@@ -37,15 +37,10 @@ namespace DNS_Simulation
             server = new Label();
             queryTime = new Label();
             clearButton = new Button();
-            label3 = new Label();
-            loadBalancerIpAddressTextBox = new TextBox();
-            label4 = new Label();
-            loadBalancerPortTextBox = new TextBox();
             type = new ComboBox();
             label2 = new Label();
             domainInput = new TextBox();
             label1 = new Label();
-            connectButton = new Button();
             testToggle = new CheckBox();
             label5 = new Label();
             numOfRequests = new TextBox();
@@ -55,7 +50,7 @@ namespace DNS_Simulation
             // sendButton
             // 
             sendButton.BackColor = SystemColors.ActiveCaption;
-            sendButton.Location = new Point(672, 52);
+            sendButton.Location = new Point(672, 12);
             sendButton.Name = "sendButton";
             sendButton.Size = new Size(148, 60);
             sendButton.TabIndex = 2;
@@ -68,9 +63,9 @@ namespace DNS_Simulation
             responseBox.FormattingEnabled = true;
             responseBox.HorizontalScrollbar = true;
             responseBox.ItemHeight = 20;
-            responseBox.Location = new Point(20, 150);
+            responseBox.Location = new Point(20, 110);
             responseBox.Name = "responseBox";
-            responseBox.Size = new Size(800, 344);
+            responseBox.Size = new Size(800, 384);
             responseBox.TabIndex = 3;
             // 
             // groupBox1
@@ -125,7 +120,7 @@ namespace DNS_Simulation
             // clearButton
             // 
             clearButton.BackColor = Color.RosyBrown;
-            clearButton.Location = new Point(672, 115);
+            clearButton.Location = new Point(672, 75);
             clearButton.Name = "clearButton";
             clearButton.Size = new Size(148, 29);
             clearButton.TabIndex = 5;
@@ -133,44 +128,11 @@ namespace DNS_Simulation
             clearButton.UseVisualStyleBackColor = false;
             clearButton.Click += clearButton_Click;
             // 
-            // label3
-            // 
-            label3.AutoSize = true;
-            label3.Location = new Point(22, 15);
-            label3.Name = "label3";
-            label3.Size = new Size(78, 20);
-            label3.TabIndex = 0;
-            label3.Text = "IP Address";
-            // 
-            // loadBalancerIpAddressTextBox
-            // 
-            loadBalancerIpAddressTextBox.Location = new Point(106, 12);
-            loadBalancerIpAddressTextBox.Name = "loadBalancerIpAddressTextBox";
-            loadBalancerIpAddressTextBox.Size = new Size(205, 27);
-            loadBalancerIpAddressTextBox.TabIndex = 1;
-            // 
-            // label4
-            // 
-            label4.AutoSize = true;
-            label4.Location = new Point(322, 15);
-            label4.Name = "label4";
-            label4.Size = new Size(35, 20);
-            label4.TabIndex = 0;
-            label4.Text = "Port";
-            // 
-            // loadBalancerPortTextBox
-            // 
-            loadBalancerPortTextBox.Location = new Point(363, 12);
-            loadBalancerPortTextBox.Name = "loadBalancerPortTextBox";
-            loadBalancerPortTextBox.Size = new Size(140, 27);
-            loadBalancerPortTextBox.TabIndex = 1;
-            loadBalancerPortTextBox.Text = "8080";
-            // 
             // type
             // 
             type.FormattingEnabled = true;
             type.Items.AddRange(new object[] { "A", "AAAA", "CNAME", "ANY", "MX", "NS", "TXT", "PTR" });
-            type.Location = new Point(363, 49);
+            type.Location = new Point(363, 9);
             type.Name = "type";
             type.Size = new Size(140, 28);
             type.TabIndex = 11;
@@ -178,7 +140,7 @@ namespace DNS_Simulation
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(317, 52);
+            label2.Location = new Point(317, 12);
             label2.Name = "label2";
             label2.Size = new Size(40, 20);
             label2.TabIndex = 10;
@@ -186,7 +148,7 @@ namespace DNS_Simulation
             // 
             // domainInput
             // 
-            domainInput.Location = new Point(106, 49);
+            domainInput.Location = new Point(106, 9);
             domainInput.Name = "domainInput";
             domainInput.Size = new Size(205, 27);
             domainInput.TabIndex = 9;
@@ -194,27 +156,16 @@ namespace DNS_Simulation
             // label1
             // 
             label1.AutoSize = true;
-            label1.Location = new Point(22, 52);
+            label1.Location = new Point(22, 12);
             label1.Name = "label1";
             label1.Size = new Size(62, 20);
             label1.TabIndex = 8;
             label1.Text = "Domain";
             // 
-            // connectButton
-            // 
-            connectButton.BackColor = SystemColors.ActiveCaption;
-            connectButton.Location = new Point(509, 11);
-            connectButton.Name = "connectButton";
-            connectButton.Size = new Size(148, 29);
-            connectButton.TabIndex = 2;
-            connectButton.Text = "Connect";
-            connectButton.UseVisualStyleBackColor = false;
-            connectButton.Click += connectButton_Click;
-            // 
             // testToggle
             // 
             testToggle.AutoSize = true;
-            testToggle.Location = new Point(509, 52);
+            testToggle.Location = new Point(509, 12);
             testToggle.Name = "testToggle";
             testToggle.Size = new Size(160, 24);
             testToggle.TabIndex = 12;
@@ -224,7 +175,7 @@ namespace DNS_Simulation
             // label5
             // 
             label5.AutoSize = true;
-            label5.Location = new Point(408, 88);
+            label5.Location = new Point(408, 48);
             label5.Name = "label5";
             label5.Size = new Size(95, 20);
             label5.TabIndex = 8;
@@ -232,7 +183,7 @@ namespace DNS_Simulation
             // 
             // numOfRequests
             // 
-            numOfRequests.Location = new Point(509, 85);
+            numOfRequests.Location = new Point(509, 45);
             numOfRequests.Name = "numOfRequests";
             numOfRequests.Size = new Size(157, 27);
             numOfRequests.TabIndex = 9;
@@ -252,12 +203,7 @@ namespace DNS_Simulation
             Controls.Add(clearButton);
             Controls.Add(groupBox1);
             Controls.Add(responseBox);
-            Controls.Add(connectButton);
             Controls.Add(sendButton);
-            Controls.Add(loadBalancerPortTextBox);
-            Controls.Add(label4);
-            Controls.Add(loadBalancerIpAddressTextBox);
-            Controls.Add(label3);
             Name = "Client";
             Text = "Client";
             groupBox1.ResumeLayout(false);
@@ -274,15 +220,10 @@ namespace DNS_Simulation
         private Label server;
         private Label queryTime;
         private Button clearButton;
-        private Label label3;
-        private TextBox loadBalancerIpAddressTextBox;
-        private Label label4;
-        private TextBox loadBalancerPortTextBox;
         private ComboBox type;
         private Label label2;
         private TextBox domainInput;
         private Label label1;
-        private Button connectButton;
         private Label loadBalancerLabel;
         private CheckBox testToggle;
         private Label label5;

@@ -60,7 +60,7 @@
             Controls.Add(clearButton);
             Controls.Add(loadBalanceLog);
             Name = "LoadBalancer";
-            Text = "LoadBalancer";
+            Text = "Load Balancer";
             ResumeLayout(false);
         }
 

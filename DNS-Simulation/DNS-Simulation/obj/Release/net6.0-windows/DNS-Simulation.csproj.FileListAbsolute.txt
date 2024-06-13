@@ -42,7 +42,6 @@ C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\Ne
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\bin\Release\net6.0-windows\runtimes\win\lib\net6.0\System.Runtime.Caching.dll
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.csproj.AssemblyReference.cache
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.Client.resources
-C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.Server.resources
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.csproj.GenerateResource.cache
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.GeneratedMSBuildEditorConfig.editorconfig
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.AssemblyInfoInputs.cache
@@ -171,3 +170,5 @@ E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Rele
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.pdb
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.genruntimeconfig.cache
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\ref\DNS-Simulation.dll
+C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerControl.resources
+C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerForm.resources
