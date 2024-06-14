@@ -16,6 +16,9 @@ namespace DNS_Simulation
         private int _currentIndex;
         private readonly ConcurrentQueue<DnsClientPool> _clientPools;
         private int MaxLogItems = 500;
+        private readonly ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
+        private readonly System.Windows.Forms.Timer _logTimer;
+        private const int LogTimerInterval = 3000;
 
         public LoadBalancer()
         {
@@ -27,6 +30,11 @@ namespace DNS_Simulation
             _currentIndex = 0;
             _clientPools = new ConcurrentQueue<DnsClientPool>(servers.Select(server => new DnsClientPool(maxPoolSize, server)));
             InitializeComponent();
+
+            _logTimer = new System.Windows.Forms.Timer();
+            _logTimer.Interval = LogTimerInterval;
+            _logTimer.Tick += LogTimer_Tick;
+            _logTimer.Start();
         }
 
         public async Task StartAsync(IPAddress? ipAddress, int port)
@@ -61,7 +69,7 @@ namespace DNS_Simulation
                     return;
                 }
 
-                var dnsClient = selectedPool.GetClient();
+                var dnsClient = await selectedPool.GetClientAsync(); // Use asynchronous method to get client from pool
                 try
                 {
                     var response = await dnsClient.Query(query, CancellationToken.None);
@@ -89,11 +97,28 @@ namespace DNS_Simulation
             }
         }
 
+        private readonly List<string> _availableServers = new List<string>();
+
         private string GetNextServerAddress()
         {
-            string address = _serverAddresses[_currentIndex];
-            _currentIndex = (_currentIndex + 1) % _serverAddresses.Count;
-            return address;
+            lock (_availableServers)
+            {
+                if (_availableServers.Count == 0)
+                {
+                    // Refresh the cache of available servers
+                    _availableServers.AddRange(_serverAddresses);
+                }
+
+                if (_availableServers.Count > 0)
+                {
+                    string address = _availableServers[0];
+                    _availableServers.RemoveAt(0);
+                    return address;
+                }
+            }
+
+            // If no available servers, return a default or handle the case appropriately
+            return string.Empty;
         }
 
         private void clearButton_Click(object sender, EventArgs e)
@@ -103,10 +128,10 @@ namespace DNS_Simulation
 
         public void HandleRequestReceived(object sender, ServerForm.RequestReceivedEventArgs args)
         {
-            Task.Run(() => AddLoadBalanceLogItem(args.RequestArgs, args.ServerName));
+            Task.Run(() => EnqueueLogItem(args.RequestArgs, args.ServerName));
         }
 
-        private void AddLoadBalanceLogItem(DnsServer.RequestedEventArgs args, string serverName)
+        private void EnqueueLogItem(DnsServer.RequestedEventArgs args, string serverName)
         {
             var remoteEndpoint = args.Remote;
             var requestDomain = args.Request.Questions[0]?.Name?.ToString();
@@ -114,23 +139,41 @@ namespace DNS_Simulation
             string message = $"Request from {remoteEndpoint.Address}:{remoteEndpoint.Port} for {requestDomain} - handling by {serverName}";
             Logger.Log(message);
 
+            _logQueue.Enqueue(message);
+        }
+
+        private void LogTimer_Tick(object sender, EventArgs e)
+        {
+            if (_logQueue.IsEmpty)
+                return;
+
+            var logItems = new List<string>();
+            while (_logQueue.TryDequeue(out var logItem))
+            {
+                logItems.Add(logItem);
+            }
+
             if (loadBalanceLog.InvokeRequired)
             {
                 loadBalanceLog.Invoke(new Action(() =>
                 {
-                    InsertLogItem(message);
+                    InsertLogItems(logItems);
                 }));
             }
             else
             {
-                InsertLogItem(message);
+                InsertLogItems(logItems);
             }
         }
 
-        private void InsertLogItem(string message)
+        private void InsertLogItems(List<string> logItems)
         {
-            loadBalanceLog.Items.Insert(0, message);
-            if (loadBalanceLog.Items.Count > MaxLogItems)
+            foreach (var logItem in logItems)
+            {
+                loadBalanceLog.Items.Insert(0, logItem);
+            }
+
+            while (loadBalanceLog.Items.Count > MaxLogItems)
             {
                 loadBalanceLog.Items.RemoveAt(loadBalanceLog.Items.Count - 1);
             }
@@ -152,13 +195,13 @@ namespace DNS_Simulation
             _serverEndpoint = serverEndpoint;
         }
 
-        public DnsUdpClient GetClient()
+        public async Task<DnsUdpClient> GetClientAsync()
         {
             if (_clientPool.TryTake(out var client))
             {
                 return client;
             }
-            return CreateDnsUdpClient();
+            return await CreateDnsUdpClientAsync();
         }
 
         public void ReturnClient(DnsUdpClient client)
@@ -173,14 +216,14 @@ namespace DNS_Simulation
             }
         }
 
-        private DnsUdpClient CreateDnsUdpClient()
+        private async Task<DnsUdpClient> CreateDnsUdpClientAsync()
         {
             var options = new DnsUdpClientOptions
             {
                 Endpoint = _serverEndpoint,
-                Timeout = TimeSpan.FromSeconds(10)
+                Timeout = TimeSpan.FromSeconds(20)
             };
-            return new DnsUdpClient(options);
+            return await Task.Run(() => new DnsUdpClient(options));
         }
     }
 }

@@ -37,6 +37,7 @@
             label2 = new Label();
             clientNumDropDown = new NumericUpDown();
             newServerButton = new Button();
+            testBalancerCheckBox = new CheckBox();
             ((System.ComponentModel.ISupportInitialize)serverNumDropDown).BeginInit();
             ((System.ComponentModel.ISupportInitialize)clientNumDropDown).BeginInit();
             SuspendLayout();
@@ -44,7 +45,7 @@
             // localRadioButton
             // 
             localRadioButton.AutoSize = true;
-            localRadioButton.Location = new Point(157, 162);
+            localRadioButton.Location = new Point(157, 178);
             localRadioButton.Name = "localRadioButton";
             localRadioButton.Size = new Size(65, 24);
             localRadioButton.TabIndex = 2;
@@ -66,7 +67,7 @@
             // lanRadioButton
             // 
             lanRadioButton.AutoSize = true;
-            lanRadioButton.Location = new Point(281, 162);
+            lanRadioButton.Location = new Point(281, 178);
             lanRadioButton.Name = "lanRadioButton";
             lanRadioButton.Size = new Size(58, 24);
             lanRadioButton.TabIndex = 2;
@@ -128,11 +129,22 @@
             newServerButton.UseVisualStyleBackColor = false;
             newServerButton.Click += newServerButton_Click;
             // 
+            // testBalancerCheckBox
+            // 
+            testBalancerCheckBox.AutoSize = true;
+            testBalancerCheckBox.Location = new Point(172, 148);
+            testBalancerCheckBox.Name = "testBalancerCheckBox";
+            testBalancerCheckBox.Size = new Size(152, 24);
+            testBalancerCheckBox.TabIndex = 7;
+            testBalancerCheckBox.Text = "Test load balancer";
+            testBalancerCheckBox.UseVisualStyleBackColor = true;
+            // 
             // ServerControl
             // 
             AutoScaleDimensions = new SizeF(8F, 20F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(496, 325);
+            Controls.Add(testBalancerCheckBox);
             Controls.Add(label2);
             Controls.Add(label1);
             Controls.Add(clientNumDropDown);
@@ -160,5 +172,6 @@
         private Label label2;
         private NumericUpDown clientNumDropDown;
         private Button newServerButton;
+        private CheckBox testBalancerCheckBox;
     }
 }

@@ -103,12 +103,12 @@ namespace DNS_Simulation
 
                     if (testToggle.Checked)
                     {
-                        // Load Balancer Performance Test
                         int totalQueries = int.Parse(numOfRequests.Text);
                         int successfulResponsesW = 0;
                         int failedResponsesW = 0;
                         var testWatch = System.Diagnostics.Stopwatch.StartNew();
 
+                        // Load Balancer Performance Test
                         for (int i = 0; i < totalQueries; i++)
                         {
                             try

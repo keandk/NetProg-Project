@@ -8,6 +8,8 @@ using System.Reflection;
 using System.Net.NetworkInformation;
 using System.Diagnostics;
 using System.Data.SQLite;
+using System.Data;
+using System.Runtime.Caching;
 
 namespace DNS_Simulation
 {
@@ -17,22 +19,35 @@ namespace DNS_Simulation
         private readonly int index;
         private readonly bool isLocal;
         private readonly bool isLAN;
+        private readonly bool isTest;
         private IRequestResolver resolver;
         private readonly ServerControl serverControl;
         private const int MaxServerLogItems = 1000;
+        private System.Windows.Forms.Timer refreshTimer;
         private readonly string connectionString = "Data Source=.\\Data\\Namespace.db";
         public event EventHandler<RequestReceivedEventArgs> RequestReceived;
         public event EventHandler<IPAddressModeChangedEventArgs> IPAddressModeChanged;
 
-        public ServerForm(int index, bool isLocal, bool isLAN, ServerControl serverControl)
+        public ServerForm(int index, bool isLocal, bool isLAN, bool isTest, ServerControl serverControl)
         {
             this.index = index;
             this.isLocal = isLocal;
             this.isLAN = isLAN;
+            this.isTest = isTest;
             this.serverControl = serverControl;
             InitializeComponent();
-            InitializeServer();
+            InitializeServerAsync();
             InitializeDatabase();
+
+            refreshTimer = new System.Windows.Forms.Timer();
+            refreshTimer.Interval = 5000; // 5 seconds
+            refreshTimer.Tick += RefreshTimer_Tick;
+            refreshTimer.Start();
+        }
+
+        private void RefreshTimer_Tick(object sender, EventArgs e)
+        {
+            UpdateRecordGridViewFromDatabase();
         }
 
         private void InitializeDatabase()
@@ -53,7 +68,7 @@ namespace DNS_Simulation
             Logger.Log("Database initialized");
         }
 
-        private void SaveEntriesToDatabase(MasterFile masterFile)
+        private async Task SaveEntriesToDatabaseAsync(MasterFile masterFile)
         {
             using var connection = new SQLiteConnection(connectionString);
             connection.Open();
@@ -87,7 +102,7 @@ namespace DNS_Simulation
             transaction.Commit();
         }
 
-        private IList<IResourceRecord> GetRecordsFromDatabase(string domain, RecordType type)
+        private async Task<IList<IResourceRecord>> GetRecordsFromDatabaseAsync(string domain, RecordType type)
         {
             IList<IResourceRecord> records = new List<IResourceRecord>();
 
@@ -128,29 +143,32 @@ namespace DNS_Simulation
         {
             if (recordGridView.InvokeRequired)
             {
-                _ = recordGridView.BeginInvoke(new Action(UpdateRecordGridViewFromDatabase));
+                recordGridView.Invoke(new Action(UpdateRecordGridViewFromDatabase));
                 return;
             }
 
             try
             {
-                recordGridView.Rows.Clear();
-
-                using var connection = new SQLiteConnection(connectionString);
-                connection.Open();
-                var selectCommand = new SQLiteCommand("SELECT Domain, InitialTTL, RemainingTTL, Value, Type FROM DnsRecords", connection);
-                using var reader = selectCommand.ExecuteReader();
-                while (reader.Read())
+                if (!isTest)
                 {
-                    string domain = reader.GetString(0);
-                    string initialTtl = reader.GetString(1);
-                    string remainingTtl = reader.GetString(2);
-                    string value = reader.GetString(3);
-                    string type = reader.GetString(4);
+                    recordGridView.Rows.Clear();
 
-                    recordGridView.Rows.Add(domain, initialTtl, remainingTtl, value, type);
+                    using var connection = new SQLiteConnection(connectionString);
+                    connection.Open();
+                    var selectCommand = new SQLiteCommand("SELECT Domain, InitialTTL, RemainingTTL, Value, Type FROM DnsRecords", connection);
+                    using var reader = selectCommand.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        string domain = reader.GetString(0);
+                        string initialTtl = reader.GetString(1);
+                        string remainingTtl = reader.GetString(2);
+                        string value = reader.GetString(3);
+                        string type = reader.GetString(4);
 
-                    Logger.Log($"Updated record grid view: {domain} {initialTtl} {remainingTtl} {value} {type}");
+                        recordGridView.Rows.Add(domain, initialTtl, remainingTtl, value, type);
+
+                        Logger.Log($"Updated record grid view: {domain} {initialTtl} {remainingTtl} {value} {type}");
+                    }
                 }
             }
             catch (Exception ex)
@@ -160,7 +178,7 @@ namespace DNS_Simulation
             }
         }
 
-        private void InitializeServer()
+        private async Task InitializeServerAsync()
         {
             try
             {
@@ -179,7 +197,7 @@ namespace DNS_Simulation
                 masterFile.Add(new PointerResourceRecord(IPAddress.Parse("10.10.10.1"), Domain.FromString("thanhvien.nhom3.com"), TimeSpan.FromMinutes(1)));
                 masterFile.Add(new PointerResourceRecord(IPAddress.Parse("10.10.10.1"), Domain.FromString("members.nhom3.com"), TimeSpan.FromMinutes(1)));
 
-                SaveEntriesToDatabase(masterFile);
+                await SaveEntriesToDatabaseAsync(masterFile);
                 UpdateRecordGridViewFromDatabase();
 
                 server.Requested += (s, args) =>
@@ -196,11 +214,14 @@ namespace DNS_Simulation
 
                     string message = $"Server 1";
                     RequestReceived?.Invoke(this, new RequestReceivedEventArgs(args, message));
-                    serverLog.Invoke(new Action(() =>
+                    if (!isTest)
                     {
-                        AddServerLogItemAsync($"Server {index} is handling request from: {remoteEndpoint} for {requestDomain}");
-                        Logger.Log($"Server {index} is handling request from: {remoteEndpoint} for {requestDomain}");
-                    }));
+                        serverLog.Invoke(new Action(() =>
+                        {
+                            AddServerLogItemAsync($"Server {index} is handling request from: {remoteEndpoint} for {requestDomain}");
+                            Logger.Log($"Server {index} is handling request from: {remoteEndpoint} for {requestDomain}");
+                        }));
+                    }
                 };
 
                 server.Responded += async (sender, s) =>
@@ -310,58 +331,71 @@ namespace DNS_Simulation
                 string domain = s.Request.Questions[0].Name.ToString();
                 RecordType type = s.Request.Questions[0].Type;
 
-                // Check database first
-                IList<IResourceRecord> answers = GetRecordsFromDatabase(domain, type);
-
-                if (answers.Count > 0)
+                // Check cache first
+                if (masterFile.TryGetFromCache(domain, type, out var cachedAnswers))
                 {
-                    // Answers found in the database
-                    foreach (var answer in answers)
+                    foreach (var answer in cachedAnswers)
                     {
                         s.Response.AnswerRecords.Add(answer);
-                        AddServerLogItemAsync($"Database Response: {answer}");
-                        Logger.Log($"Database Response: {answer}");
+                        AddServerLogItemAsync($"Cached Response: {answer}");
+                        Logger.Log($"Cached Response: {answer}");
                     }
                 }
                 else
                 {
-                    answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+                    // Check database if not found in cache
+                    IList<IResourceRecord> answers = await GetRecordsFromDatabaseAsync(domain, type);
 
-                    await resolver.Resolve(s.Request);
-                    if (s.Response.AnswerRecords.Count > 0)
+                    if (answers.Count > 0)
                     {
-                        foreach (var response in s.Response.AnswerRecords)
+                        foreach (var answer in answers)
                         {
-                            switch (response)
-                            {
-                                case IPAddressResourceRecord ipAddressRecord:
-                                    masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
-                                    break;
-                                case CanonicalNameResourceRecord cnameRecord:
-                                    masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
-                                    break;
-                                case MailExchangeResourceRecord mxRecord:
-                                    masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
-                                    break;
-                                case NameServerResourceRecord nsRecord:
-                                    masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
-                                    break;
-                                case TextResourceRecord txtRecord:
-                                    masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
-                                    break;
-                            }
-
-                            AddServerLogItemAsync($"Response: {response}");
-                            Logger.Log($"Response: {response}");
+                            s.Response.AnswerRecords.Add(answer);
+                            AddServerLogItemAsync($"Database Response: {answer}");
+                            Logger.Log($"Database Response: {answer}");
                         }
+                        masterFile.AddToCache(domain, type, answers); // Add to cache
                     }
                     else
                     {
-                        AddServerLogItemAsync($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
-                        Logger.Log($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
+                        answers = masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type);
+
+                        await resolver.Resolve(s.Request);
+                        if (s.Response.AnswerRecords.Count > 0)
+                        {
+                            foreach (var response in s.Response.AnswerRecords)
+                            {
+                                switch (response)
+                                {
+                                    case IPAddressResourceRecord ipAddressRecord:
+                                        masterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                        break;
+                                    case CanonicalNameResourceRecord cnameRecord:
+                                        masterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                        break;
+                                    case MailExchangeResourceRecord mxRecord:
+                                        masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                        break;
+                                    case NameServerResourceRecord nsRecord:
+                                        masterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                        break;
+                                    case TextResourceRecord txtRecord:
+                                        masterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                        break;
+                                }
+                                masterFile.AddToCache(domain, type, s.Response.AnswerRecords); // Add to cache
+                                AddServerLogItemAsync($"Response: {response}");
+                                Logger.Log($"Response: {response}");
+                            }
+                        }
+                        else
+                        {
+                            AddServerLogItemAsync($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
+                            Logger.Log($"Record type {s.Request.Questions[0].Type} not found for domain: {s.Request.Questions[0].Name}");
+                        }
                     }
                 }
-                SaveEntriesToDatabase(masterFile);
+                await SaveEntriesToDatabaseAsync(masterFile);
                 UpdateRecordGridViewFromDatabase();
             }
             catch (Exception ex)
@@ -406,6 +440,8 @@ namespace DNS_Simulation
         {
             base.OnFormClosing(e);
 
+            refreshTimer.Stop();
+
             try
             {
                 server?.Dispose();
@@ -440,6 +476,25 @@ namespace DNS_Simulation
     public class CustomMasterFile : MasterFile
     {
         public CustomMasterFile() : base() { }
+
+        private readonly MemoryCache _cache = new MemoryCache("DnsCache");
+
+        public bool TryGetFromCache(string domain, RecordType type, out IList<IResourceRecord> records)
+        {
+            string cacheKey = $"{domain}_{type}";
+            records = _cache.Get(cacheKey) as IList<IResourceRecord>;
+            return records != null;
+        }
+
+        public void AddToCache(string domain, RecordType type, IList<IResourceRecord> records)
+        {
+            string cacheKey = $"{domain}_{type}";
+            var cachePolicy = new CacheItemPolicy
+            {
+                AbsoluteExpiration = DateTimeOffset.Now.AddMinutes(5) // Cache expiration time
+            };
+            _cache.Set(cacheKey, records, cachePolicy);
+        }
 
         public new IList<IResourceRecord> Get(Domain domain, RecordType type)
         {

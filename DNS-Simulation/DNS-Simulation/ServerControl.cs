@@ -23,6 +23,7 @@ namespace DNS_Simulation
         private List<IPEndPoint> serverEndpoints = new();
         private bool isLocal = true;
         private bool isLan = false;
+        private bool isTest = false;
         private int index;
         public LoadBalancer loadBalancer;
         private ServerForm[] servers;
@@ -39,6 +40,7 @@ namespace DNS_Simulation
         {
             int numOfServers = (int)serverNumDropDown.Value;
             int numOfClients = (int)clientNumDropDown.Value;
+            isTest = testBalancerCheckBox.Checked;
             servers = new ServerForm[numOfServers];
             serverIpAddressLan = GetLocalIPAddress();
 
@@ -49,7 +51,7 @@ namespace DNS_Simulation
                 {
                     isLocal = true;
                     isLan = false;
-                    servers[index] = new ServerForm(index + 1, isLocal, isLan, this);
+                    servers[index] = new ServerForm(index + 1, isLocal, isLan, isTest, this);
                     servers[index].Show();
                     IPAddress ip = IPAddress.Parse("127.0.0.1");
                     serverEndpoints.Add(new IPEndPoint(ip, 8081 + index));
@@ -61,7 +63,7 @@ namespace DNS_Simulation
                     {
                         isLan = true;
                         isLocal = false;
-                        servers[index] = new ServerForm(index + 1, isLocal, isLan, this);
+                        servers[index] = new ServerForm(index + 1, isLocal, isLan, isTest, this);
                         serverEndpoints.Add(new IPEndPoint(serverIpAddressLan, 8081 + index));
                         servers[index].Show();
                         Logger.Log($"Server {index + 1} started at {serverIpAddressLan}:{8081 + index}");
@@ -137,7 +139,7 @@ namespace DNS_Simulation
         {
             if (isLocal)
             {
-                ServerForm server = new(index++, isLocal, isLan=false, this);
+                ServerForm server = new(index++, isLocal, isLan=false, isTest, this);
                 IPAddress ip = IPAddress.Parse("127.0.0.1");
                 serverEndpoints.Add(new IPEndPoint(ip, 8081 + index));
                 Logger.Log($"New server added and running at {ip}:{8081 + index}");
@@ -145,7 +147,7 @@ namespace DNS_Simulation
             }
             else if (isLan)
             {
-                ServerForm server = new(index++, isLocal=false, isLan, this);
+                ServerForm server = new(index++, isLocal=false, isLan, isTest, this);
                 serverEndpoints.Add(new IPEndPoint(serverIpAddressLan, 8081 + index));
                 Logger.Log($"New server added and running at {serverIpAddressLan}:{8081 + index}");
                 server.Show();
