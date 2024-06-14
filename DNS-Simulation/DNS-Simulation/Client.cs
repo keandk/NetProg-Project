@@ -41,6 +41,7 @@ namespace DNS_Simulation
         {
             InitializeComponent();
             this.serverControl = serverControl;
+            loadBalancerIp = serverControl.loadBalancerIp;
             InitializeDnsClient();
             if (dnsClientInitialized)
             {
@@ -60,8 +61,6 @@ namespace DNS_Simulation
         {
             try
             {
-                loadBalancerIp = serverControl.loadBalancerIp;
-
                 loadBalancerEndpoint = new IPEndPoint(loadBalancerIp, loadBalancerPort);
 
                 var options = new DnsUdpClientOptions

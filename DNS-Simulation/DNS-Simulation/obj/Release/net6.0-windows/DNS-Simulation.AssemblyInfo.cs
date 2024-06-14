@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("DNS-Simulation")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Release")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+40663b8c2c29ad6a6258a57a3bd8585ac01c75e1")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+9fc9c39d92ab39a6acfd0a1c3418eb050568e2a5")]
 [assembly: System.Reflection.AssemblyProductAttribute("DNS-Simulation")]
 [assembly: System.Reflection.AssemblyTitleAttribute("DNS-Simulation")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

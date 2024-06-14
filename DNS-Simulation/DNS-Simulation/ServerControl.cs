@@ -105,6 +105,7 @@ namespace DNS_Simulation
                     lanIpAsk.ShowDialog();
                     if (lanIpAsk.serverIp != null)
                     {
+                        MessageBox.Show($"Client connecting to {lanIpAsk.serverIp}:{8080}", "Client", MessageBoxButtons.OK, MessageBoxIcon.Information);
                         Client client = new(this, lanIpAsk.serverIp);
                         client.Show();
                     }
