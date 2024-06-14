@@ -157,7 +157,6 @@ E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\bin\Rele
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.csproj.AssemblyReference.cache
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.Client.resources
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.LoadBalancer.resources
-E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.Server.resources
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.csproj.GenerateResource.cache
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.GeneratedMSBuildEditorConfig.editorconfig
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS-Simulation.AssemblyInfoInputs.cache
@@ -172,3 +171,5 @@ E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Rele
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\ref\DNS-Simulation.dll
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerControl.resources
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerForm.resources
+E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerControl.resources
+E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerForm.resources

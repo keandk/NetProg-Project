@@ -1,20 +1,20 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {}
+    "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {}
   },
   "projects": {
-    "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {
+    "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+        "projectUniqueName": "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
         "projectName": "DNS-Simulation",
-        "projectPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
-        "packagesPath": "C:\\Users\\luutr\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
+        "projectPath": "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\DNS-Simulation.csproj",
+        "packagesPath": "C:\\Users\\THANH BINH\\.nuget\\packages\\",
+        "outputPath": "E:\\HK4\\LapTrinhMangCanBan\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
-          "C:\\Users\\luutr\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\THANH BINH\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
@@ -22,6 +22,7 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -101,7 +102,7 @@
               "privateAssets": "none"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.205\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.300\\RuntimeIdentifierGraph.json"
         }
       }
     }

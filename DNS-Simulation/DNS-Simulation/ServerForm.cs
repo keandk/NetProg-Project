@@ -28,7 +28,7 @@ namespace DNS_Simulation
         private System.Windows.Forms.Timer refreshTimer;
         private System.Windows.Forms.Timer _logFlushTimer;
         private const int LogFlushInterval = 1000;
-        private readonly string connectionString = "Data Source=.\\Data\\Namespace.db";
+        private readonly string connectionString = "Data Source=.\\Data\\NameSpace.db";
         public event EventHandler<RequestReceivedEventArgs> RequestReceived;
 
         public ServerForm(int index, bool isLocal, bool isLAN, bool isTest, ServerControl serverControl)
@@ -38,6 +38,13 @@ namespace DNS_Simulation
             this.isLAN = isLAN;
             this.isTest = isTest;
             this.serverControl = serverControl;
+
+            using var connection = new SQLiteConnection(connectionString);
+            connection.Open();
+            string resetdatabase = @"DELETE FROM [DnsRecords]";
+            using var resetcommand = new SQLiteCommand(resetdatabase, connection);
+            resetcommand.ExecuteNonQuery();
+
             InitializeComponent();
             InitializeServerAsync();
             InitializeDatabase();
@@ -100,7 +107,9 @@ namespace DNS_Simulation
                     Value TEXT,
                     Type TEXT
                 )";
+            
             using var command = new SQLiteCommand(tableCreationQuery, connection);
+            
             command.ExecuteNonQuery();
             Logger.Log("Database initialized");
         }
@@ -108,10 +117,9 @@ namespace DNS_Simulation
         private async Task SaveEntriesToDatabaseAsync(MasterFile masterFile)
         {
             using var connection = new SQLiteConnection(connectionString);
-            connection.Open();
+            await connection.OpenAsync();
             using var transaction = connection.BeginTransaction();
-            var deleteCommand = new SQLiteCommand("DELETE FROM DnsRecords", connection, transaction);
-            deleteCommand.ExecuteNonQuery();
+
             FieldInfo entriesField = typeof(MasterFile).GetField("entries", BindingFlags.NonPublic | BindingFlags.Instance);
             IList<IResourceRecord> entries = (IList<IResourceRecord>)entriesField.GetValue(masterFile);
 
@@ -125,19 +133,46 @@ namespace DNS_Simulation
                 string value = entry.ToString();
                 string type = entry.Type.ToString();
 
-                var insertCommand = new SQLiteCommand("INSERT INTO DnsRecords (Domain, InitialTTL, RemainingTTL, Value, Type) VALUES (@Domain, @InitialTTL, @RemainingTTL, @Value, @Type)", connection, transaction);
-                insertCommand.Parameters.AddWithValue("@Domain", domain);
-                insertCommand.Parameters.AddWithValue("@InitialTTL", initialTtl);
-                insertCommand.Parameters.AddWithValue("@RemainingTTL", formattedRemainingTtl);
-                insertCommand.Parameters.AddWithValue("@Value", value);
-                insertCommand.Parameters.AddWithValue("@Type", type);
-                insertCommand.ExecuteNonQuery();
+                // Kiểm tra xem bản ghi có tồn tại và có giống hệt bản ghi mới không
+                var selectCommand = new SQLiteCommand(@"
+            SELECT COUNT(*) FROM DnsRecords 
+            WHERE Domain = @Domain 
+            AND InitialTTL = @InitialTTL 
+            AND RemainingTTL = @RemainingTTL 
+            AND Value = @Value 
+            AND Type = @Type", connection, transaction);
+                selectCommand.Parameters.AddWithValue("@Domain", domain);
+                selectCommand.Parameters.AddWithValue("@InitialTTL", initialTtl);
+                selectCommand.Parameters.AddWithValue("@RemainingTTL", formattedRemainingTtl);
+                selectCommand.Parameters.AddWithValue("@Value", value);
+                selectCommand.Parameters.AddWithValue("@Type", type);
 
-                Logger.Log($"Saved record to database: {domain} {initialTtl} {formattedRemainingTtl} {value} {type}");
+                long count = (long)await selectCommand.ExecuteScalarAsync();
+
+                if (count == 0)
+                {
+                    var insertCommand = new SQLiteCommand(@"
+                INSERT OR REPLACE INTO DnsRecords (Domain, InitialTTL, RemainingTTL, Value, Type) 
+                VALUES (@Domain, @InitialTTL, @RemainingTTL, @Value, @Type)", connection, transaction);
+                    insertCommand.Parameters.AddWithValue("@Domain", domain);
+                    insertCommand.Parameters.AddWithValue("@InitialTTL", initialTtl);
+                    insertCommand.Parameters.AddWithValue("@RemainingTTL", formattedRemainingTtl);
+                    insertCommand.Parameters.AddWithValue("@Value", value);
+                    insertCommand.Parameters.AddWithValue("@Type", type);
+                    await insertCommand.ExecuteNonQueryAsync();
+
+                    Logger.Log($"Saved record to database: {domain} {initialTtl} {formattedRemainingTtl} {value} {type}");
+                }
+                else
+                {
+                    Logger.Log($"Record already exists in database: {domain} {initialTtl} {formattedRemainingTtl} {value} {type}");
+                }
             }
 
-            transaction.Commit();
+            await transaction.CommitAsync();
         }
+
+
 
         private async Task<IList<IResourceRecord>> GetRecordsFromDatabaseAsync(string domain, RecordType type)
         {
