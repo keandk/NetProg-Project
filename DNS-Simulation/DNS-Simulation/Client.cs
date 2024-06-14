@@ -17,6 +17,26 @@ namespace DNS_Simulation
         private IPAddress? loadBalancerIp;
         private readonly int loadBalancerPort = 8080;
 
+        public Client(ServerControl serverControl, IPAddress iPAddress)
+        {
+            InitializeComponent();
+            this.serverControl = serverControl;
+            loadBalancerIp = iPAddress;
+            InitializeDnsClient();
+            if (dnsClientInitialized)
+            {
+                loadBalancerLabel.Text = "Connected to " + loadBalancerIp.ToString() + $" at port {loadBalancerPort}";
+                Logger.Log($"Connected to {loadBalancerIp} at port {loadBalancerPort}");
+            }
+            else
+            {
+                loadBalancerLabel.Text = "Not Connected";
+                MessageBox.Show("Failed to connect to the DNS server.", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Logger.Log("Failed to connect to the DNS server.");
+            }
+            type.SelectedIndex = 0;
+        }
+
         public Client(ServerControl serverControl)
         {
             InitializeComponent();
@@ -25,7 +45,7 @@ namespace DNS_Simulation
             if (dnsClientInitialized)
             {
                 loadBalancerLabel.Text = "Connected to "+ loadBalancerIp.ToString() + $" at port {loadBalancerPort}";
-                Logger.Log($"Connected to {loadBalancerIp.ToString()} at port {loadBalancerPort}");
+                Logger.Log($"Connected to {loadBalancerIp} at port {loadBalancerPort}");
             }
             else
             {

@@ -82,7 +82,7 @@
             listenButton.Name = "listenButton";
             listenButton.Size = new Size(112, 38);
             listenButton.TabIndex = 1;
-            listenButton.Text = "Listen";
+            listenButton.Text = "Create";
             listenButton.UseVisualStyleBackColor = false;
             listenButton.Click += listenButton_Click;
             // 

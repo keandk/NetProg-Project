@@ -21,9 +21,9 @@ namespace DNS_Simulation
     public partial class ServerControl : Form
     {
         private List<IPEndPoint> serverEndpoints = new();
-        private bool isLocal = true;
-        private bool isLan = false;
-        private bool isTest = false;
+        private bool isLocal;
+        private bool isLan;
+        private bool isTest;
         private int index;
         public LoadBalancer loadBalancer;
         private ServerForm[] servers;
@@ -41,12 +41,14 @@ namespace DNS_Simulation
             int numOfServers = (int)serverNumDropDown.Value;
             int numOfClients = (int)clientNumDropDown.Value;
             isTest = testBalancerCheckBox.Checked;
+            isLocal = localRadioButton.Checked;
+            isLan = lanRadioButton.Checked;
             servers = new ServerForm[numOfServers];
             serverIpAddressLan = GetLocalIPAddress();
 
+            // create numOfServers servers
             for (index = 0; index < numOfServers; index++)
             {
-                // create numOfServers servers
                 if (localRadioButton.Checked)
                 {
                     isLocal = true;
@@ -86,17 +88,32 @@ namespace DNS_Simulation
             int pool = 20;
             loadBalancer = new LoadBalancer(serverEndpoints, pool);
 
-            loadBalancer.Show();
-
             loadBalancerIp = localRadioButton.Checked ? IPAddress.Parse("127.0.0.1") : serverIpAddressLan;
             int loadBalancerPort = 8080;
             Thread loadBalancerThread = new Thread(() => loadBalancer.StartAsync(loadBalancerIp, loadBalancerPort));
             loadBalancerThread.Start();
+            if (numOfServers > 0)
+            {
+                loadBalancer.Show();
+            }
 
             for (int i = 0; i < numOfClients; i++)
             {
-                Client client = new(this);
-                client.Show();
+                if (isLan)
+                {
+                    LanIPAsk lanIpAsk = new();
+                    lanIpAsk.ShowDialog();
+                    if (lanIpAsk.serverIp != null)
+                    {
+                        Client client = new(this, lanIpAsk.serverIp);
+                        client.Show();
+                    }
+                }
+                else
+                {
+                    Client client = new(this);
+                    client.Show();
+                }
             }
         }
 

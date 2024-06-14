@@ -320,14 +320,14 @@ namespace DNS_Simulation
                 {
                     ip = IPAddress.Parse("127.0.0.1");
                     ipAddressLabel.Text = ip.ToString() + $":{8080 + index}";
-                    Logger.Log($"Server {index} started at localhost"); 
+                    Logger.Log($"Server {index} started at localhost");
                 }
                 else if (isLAN)
                 {
                     ip = GetLocalIPAddress();
                     if (ip != null)
                     {
-                        ipAddressLabel.Text = ip.ToString() + $":{8081 + index}";
+                        ipAddressLabel.Text = ip.ToString() + $":{8080 + index}";
                         Logger.Log($"Server {index} started at {ip}:{8080 + index}");
                     }
                 }

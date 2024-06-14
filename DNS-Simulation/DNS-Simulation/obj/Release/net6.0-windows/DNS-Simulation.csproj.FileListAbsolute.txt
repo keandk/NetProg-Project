@@ -173,3 +173,4 @@ C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\Ne
 C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerForm.resources
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerControl.resources
 E:\HK4\LapTrinhMangCanBan\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.ServerForm.resources
+C:\Users\luutr\Desktop\CODING\University\Sophomore\Term 2\Network Programming\NetProg-Project\DNS-Simulation\DNS-Simulation\obj\Release\net6.0-windows\DNS_Simulation.LanIPAsk.resources
