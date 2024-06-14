@@ -14,25 +14,26 @@ namespace DNS_Simulation
     {
         private readonly List<string> _serverAddresses;
         private int _currentIndex;
-        private readonly ConcurrentQueue<DnsClientPool> _clientPools;
-        private int MaxLogItems = 500;
-        private readonly ConcurrentQueue<string> _logQueue = new ConcurrentQueue<string>();
+        private readonly ConcurrentDictionary<string, DnsClientPool> _clientPools;
+        private readonly int MaxLogItems = 500;
+        private readonly ConcurrentQueue<string> _logQueue = new();
         private readonly System.Windows.Forms.Timer _logTimer;
-        private const int LogTimerInterval = 3000;
-
-        public LoadBalancer()
-        {
-        }
+        private const int LogTimerInterval = 2000;
+        private const int LogBatchSize = 500;
 
         public LoadBalancer(List<IPEndPoint> servers, int maxPoolSize)
         {
             _serverAddresses = servers.Select(server => $"{server.Address}:{server.Port}").ToList();
             _currentIndex = 0;
-            _clientPools = new ConcurrentQueue<DnsClientPool>(servers.Select(server => new DnsClientPool(maxPoolSize, server)));
+            _clientPools = new ConcurrentDictionary<string, DnsClientPool>(
+                servers.ToDictionary(server => $"{server.Address}:{server.Port}", server => new DnsClientPool(maxPoolSize, server))
+            );
             InitializeComponent();
 
-            _logTimer = new System.Windows.Forms.Timer();
-            _logTimer.Interval = LogTimerInterval;
+            _logTimer = new System.Windows.Forms.Timer
+            {
+                Interval = LogTimerInterval
+            };
             _logTimer.Tick += LogTimer_Tick;
             _logTimer.Start();
         }
@@ -60,65 +61,41 @@ namespace DNS_Simulation
 
                 var header = query.Header;
 
-                // Get the next available server using round-robin
                 var selectedServer = GetNextServerAddress();
-                var selectedPool = _clientPools.FirstOrDefault(pool => $"{pool.ServerEndpoint.Address}:{pool.ServerEndpoint.Port}" == selectedServer);
-                if (selectedPool == null)
+                if (_clientPools.TryGetValue(selectedServer, out var selectedPool))
                 {
-                    // Handle the case when the selected server is not found in the client pools
-                    return;
-                }
+                    var dnsClient = await selectedPool.GetClientAsync();
+                    try
+                    {
+                        var response = await dnsClient.Query(query, CancellationToken.None);
 
-                var dnsClient = await selectedPool.GetClientAsync(); // Use asynchronous method to get client from pool
-                try
-                {
-                    var response = await dnsClient.Query(query, CancellationToken.None);
+                        var responseBytes = new byte[udpClient.Client.ReceiveBufferSize];
+                        offset = 0;
+                        response.WriteBytes(responseBytes, ref offset);
 
-                    var responseBytes = new byte[udpClient.Client.ReceiveBufferSize];
-                    offset = 0;
-                    response.WriteBytes(responseBytes, ref offset);
-
-                    await udpClient.SendAsync(responseBytes, offset, result.RemoteEndPoint);
-                }
-                catch (Exception ex)
-                {
-                    // Log the error using a separate logging mechanism
-                    Logger.Log($"Error occurred while processing request: {ex.Message}");
-                }
-                finally
-                {
-                    selectedPool.ReturnClient(dnsClient);
+                        await udpClient.SendAsync(responseBytes, offset, result.RemoteEndPoint);
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Log($"Error occurred while processing request: {ex.Message}");
+                    }
+                    finally
+                    {
+                        selectedPool.ReturnClient(dnsClient);
+                    }
                 }
             }
             catch (Exception ex)
             {
-                // Log the error using a separate logging mechanism
                 Logger.Log($"Error processing request: {ex.Message}");
             }
         }
 
-        private readonly List<string> _availableServers = new List<string>();
-
         private string GetNextServerAddress()
         {
-            lock (_availableServers)
-            {
-                if (_availableServers.Count == 0)
-                {
-                    // Refresh the cache of available servers
-                    _availableServers.AddRange(_serverAddresses);
-                }
-
-                if (_availableServers.Count > 0)
-                {
-                    string address = _availableServers[0];
-                    _availableServers.RemoveAt(0);
-                    return address;
-                }
-            }
-
-            // If no available servers, return a default or handle the case appropriately
-            return string.Empty;
+            int index = Interlocked.Increment(ref _currentIndex);
+            int serverIndex = index % _serverAddresses.Count;
+            return _serverAddresses[serverIndex];
         }
 
         private void clearButton_Click(object sender, EventArgs e)
@@ -148,7 +125,7 @@ namespace DNS_Simulation
                 return;
 
             var logItems = new List<string>();
-            while (_logQueue.TryDequeue(out var logItem))
+            while (logItems.Count < LogBatchSize && _logQueue.TryDequeue(out var logItem))
             {
                 logItems.Add(logItem);
             }
@@ -182,38 +159,40 @@ namespace DNS_Simulation
 
     public class DnsClientPool
     {
-        private readonly ConcurrentBag<DnsUdpClient> _clientPool;
+        private readonly ConcurrentQueue<DnsUdpClient> _clientPool;
         private readonly int _maxPoolSize;
         private readonly IPEndPoint _serverEndpoint;
+        private int _currentPoolSize;
+        private readonly SemaphoreSlim _poolSemaphore;
 
         public IPEndPoint ServerEndpoint => _serverEndpoint;
 
         public DnsClientPool(int maxPoolSize, IPEndPoint serverEndpoint)
         {
-            _clientPool = new ConcurrentBag<DnsUdpClient>();
+            _clientPool = new ConcurrentQueue<DnsUdpClient>();
             _maxPoolSize = maxPoolSize;
             _serverEndpoint = serverEndpoint;
+            _currentPoolSize = 0;
+            _poolSemaphore = new SemaphoreSlim(maxPoolSize);
         }
 
         public async Task<DnsUdpClient> GetClientAsync()
         {
-            if (_clientPool.TryTake(out var client))
+            await _poolSemaphore.WaitAsync();
+
+            if (_clientPool.TryDequeue(out var client))
             {
                 return client;
             }
+
+            Interlocked.Increment(ref _currentPoolSize);
             return await CreateDnsUdpClientAsync();
         }
 
         public void ReturnClient(DnsUdpClient client)
         {
-            if (_clientPool.Count < _maxPoolSize)
-            {
-                _clientPool.Add(client);
-            }
-            else
-            {
-                client.Dispose();
-            }
+            _clientPool.Enqueue(client);
+            _poolSemaphore.Release();
         }
 
         private async Task<DnsUdpClient> CreateDnsUdpClientAsync()

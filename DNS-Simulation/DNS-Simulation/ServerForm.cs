@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.Data.SQLite;
 using System.Data;
 using System.Runtime.Caching;
+using System.Collections.Concurrent;
 
 namespace DNS_Simulation
 {
@@ -23,10 +24,12 @@ namespace DNS_Simulation
         private IRequestResolver resolver;
         private readonly ServerControl serverControl;
         private const int MaxServerLogItems = 1000;
+        private const int LogBatchSize = 200;
         private System.Windows.Forms.Timer refreshTimer;
+        private System.Windows.Forms.Timer _logFlushTimer;
+        private const int LogFlushInterval = 1000;
         private readonly string connectionString = "Data Source=.\\Data\\Namespace.db";
         public event EventHandler<RequestReceivedEventArgs> RequestReceived;
-        public event EventHandler<IPAddressModeChangedEventArgs> IPAddressModeChanged;
 
         public ServerForm(int index, bool isLocal, bool isLAN, bool isTest, ServerControl serverControl)
         {
@@ -38,6 +41,7 @@ namespace DNS_Simulation
             InitializeComponent();
             InitializeServerAsync();
             InitializeDatabase();
+            InitializeLogFlushTimer();
 
             refreshTimer = new System.Windows.Forms.Timer();
             refreshTimer.Interval = 5000; // 5 seconds
@@ -48,6 +52,39 @@ namespace DNS_Simulation
         private void RefreshTimer_Tick(object sender, EventArgs e)
         {
             UpdateRecordGridViewFromDatabase();
+        }
+
+        private void InitializeLogFlushTimer()
+        {
+            _logFlushTimer = new System.Windows.Forms.Timer();
+            _logFlushTimer.Interval = LogFlushInterval;
+            _logFlushTimer.Tick += LogFlushTimer_Tick;
+            _logFlushTimer.Start();
+        }
+
+        private void LogFlushTimer_Tick(object sender, EventArgs e)
+        {
+            if (!_logBuffer.IsEmpty)
+            {
+                List<string> logBatch = new List<string>();
+                while (logBatch.Count < LogBatchSize && _logBuffer.TryDequeue(out string logMessage))
+                {
+                    logBatch.Add(logMessage);
+                }
+
+                serverLog.Invoke(new Action(() =>
+                {
+                    foreach (string logMessage in logBatch)
+                    {
+                        serverLog.Items.Insert(0, logMessage);
+                    }
+
+                    if (serverLog.Items.Count > MaxServerLogItems)
+                    {
+                        serverLog.Items.Clear();
+                    }
+                }));
+            }
         }
 
         private void InitializeDatabase()
@@ -247,7 +284,7 @@ namespace DNS_Simulation
                 if (isLocal)
                 {
                     ip = IPAddress.Parse("127.0.0.1");
-                    ipAddressLabel.Text = ip.ToString() + $":{8081 + index}";
+                    ipAddressLabel.Text = ip.ToString() + $":{8080 + index}";
                     Logger.Log($"Server {index} started at localhost"); 
                 }
                 else if (isLAN)
@@ -305,16 +342,33 @@ namespace DNS_Simulation
             Task.Run(() => AddServerLogItem(message));
         }
 
+        private readonly ConcurrentQueue<string> _logBuffer = new ConcurrentQueue<string>();
+
         private void AddServerLogItem(string message)
         {
-            serverLog.Invoke(new Action(() =>
+            _logBuffer.Enqueue(message);
+
+            if (_logBuffer.Count >= LogBatchSize)
             {
-                serverLog.Items.Insert(0, message);
-                if (serverLog.Items.Count > MaxServerLogItems)
+                List<string> logBatch = new List<string>();
+                while (logBatch.Count < LogBatchSize && _logBuffer.TryDequeue(out string logMessage))
                 {
-                    serverLog.Items.Clear();
+                    logBatch.Add(logMessage);
                 }
-            }));
+
+                serverLog.Invoke(new Action(() =>
+                {
+                    foreach (string logMessage in logBatch)
+                    {
+                        serverLog.Items.Insert(0, logMessage);
+                    }
+
+                    if (serverLog.Items.Count > MaxServerLogItems)
+                    {
+                        serverLog.Items.Clear();
+                    }
+                }));
+            }
         }
 
         private async Task HandleRespondedAsync(object sender, DnsServer.RespondedEventArgs s, CustomMasterFile masterFile)
@@ -441,6 +495,7 @@ namespace DNS_Simulation
             base.OnFormClosing(e);
 
             refreshTimer.Stop();
+            _logFlushTimer.Stop();
 
             try
             {
