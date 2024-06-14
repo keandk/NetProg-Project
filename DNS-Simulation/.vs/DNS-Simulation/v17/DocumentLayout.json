@@ -3,24 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\dns-simulation\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\client.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\servercontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\servercontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\lanipask.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\lanipask.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\dns-simulation\\servercontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\servercontrol.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|c:\\users\\luutr\\desktop\\coding\\university\\sophomore\\term 2\\network programming\\netprog-project\\dns-simulation\\dns-simulation\\lanipask.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form",
-      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\lanipask.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}|Form"
+      "AbsoluteMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\dns-simulation\\serverform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6E8D1CA5-9552-40D4-B0CD-069F3DE93381}|DNS-Simulation\\DNS-Simulation.csproj|solutionrelative:dns-simulation\\serverform.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -30,69 +14,19 @@
       "DocumentGroups": [
         {
           "DockedWidth": 320,
-          "SelectedChildIndex": 4,
+          "SelectedChildIndex": 0,
           "Children": [
             {
               "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "LanIPAsk.cs",
-              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LanIPAsk.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\LanIPAsk.cs",
-              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LanIPAsk.cs",
-              "RelativeToolTip": "DNS-Simulation\\LanIPAsk.cs",
-              "ViewState": "AQIAAAwAAAAAAAAAAAAAAAAAAAAAAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-14T13:51:52.672Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "LanIPAsk.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LanIPAsk.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\LanIPAsk.cs",
-              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\LanIPAsk.cs [Design]",
-              "RelativeToolTip": "DNS-Simulation\\LanIPAsk.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-14T13:51:50.827Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "ServerControl.cs [Design]",
-              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\ServerControl.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\ServerControl.cs",
-              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\ServerControl.cs [Design]",
-              "RelativeToolTip": "DNS-Simulation\\ServerControl.cs [Design]",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-14T13:33:42.533Z",
-              "EditorCaption": " [Design]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ServerControl.cs",
-              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\ServerControl.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\ServerControl.cs",
-              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\ServerControl.cs",
-              "RelativeToolTip": "DNS-Simulation\\ServerControl.cs",
-              "ViewState": "AQIAAFcAAAAAAAAAAAAYwF8AAAANAAAA",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-13T09:33:31.775Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "Client.cs",
-              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Client.cs",
-              "RelativeDocumentMoniker": "DNS-Simulation\\Client.cs",
-              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\Client.cs",
-              "RelativeToolTip": "DNS-Simulation\\Client.cs",
-              "ViewState": "AQIAABMAAAAAAAAAAAA7wCsAAAA6AAAA",
+              "Title": "ServerForm.cs",
+              "DocumentMoniker": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\ServerForm.cs",
+              "RelativeDocumentMoniker": "DNS-Simulation\\ServerForm.cs",
+              "ToolTip": "C:\\Users\\luutr\\Desktop\\CODING\\University\\Sophomore\\Term 2\\Network Programming\\NetProg-Project\\DNS-Simulation\\DNS-Simulation\\ServerForm.cs",
+              "RelativeToolTip": "DNS-Simulation\\ServerForm.cs",
+              "ViewState": "AQIAANcBAAAAAAAAAAAkwPIBAAANAAAA",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2024-06-14T13:07:44.969Z",
+              "WhenOpened": "2024-06-14T14:03:10.698Z",
               "EditorCaption": ""
             }
           ]

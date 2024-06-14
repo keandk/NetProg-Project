@@ -18,7 +18,7 @@ namespace DNS_Simulation
         private readonly int MaxLogItems = 500;
         private readonly ConcurrentQueue<string> _logQueue = new();
         private readonly System.Windows.Forms.Timer _logTimer;
-        private const int LogTimerInterval = 2000;
+        private const int LogTimerInterval = 1000;
         private const int LogBatchSize = 500;
 
         public LoadBalancer(List<IPEndPoint> servers, int maxPoolSize)

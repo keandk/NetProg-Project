@@ -172,8 +172,6 @@ namespace DNS_Simulation
             await transaction.CommitAsync();
         }
 
-
-
         private async Task<IList<IResourceRecord>> GetRecordsFromDatabaseAsync(string domain, RecordType type)
         {
             IList<IResourceRecord> records = new List<IResourceRecord>();
@@ -209,7 +207,6 @@ namespace DNS_Simulation
 
             return records;
         }
-
 
         private void UpdateRecordGridViewFromDatabase()
         {
@@ -419,6 +416,15 @@ namespace DNS_Simulation
                 string domain = s.Request.Questions[0].Name.ToString();
                 RecordType type = s.Request.Questions[0].Type;
 
+                // Create a new master file to store the updated records
+                var updatedMasterFile = new CustomMasterFile();
+
+                // Copy existing records from the original master file to the updated master file
+                foreach (var record in masterFile.Get(s.Request.Questions[0].Name, s.Request.Questions[0].Type))
+                {
+                    updatedMasterFile.Add(record);
+                }
+
                 // Check cache first
                 if (masterFile.TryGetFromCache(domain, type, out var cachedAnswers))
                 {
@@ -442,7 +448,7 @@ namespace DNS_Simulation
                             AddServerLogItemAsync($"Database Response: {answer}");
                             Logger.Log($"Database Response: {answer}");
                         }
-                        masterFile.AddToCache(domain, type, answers); // Add to cache
+                        updatedMasterFile.AddToCache(domain, type, answers); // Add to cache
                     }
                     else
                     {
@@ -451,37 +457,31 @@ namespace DNS_Simulation
                         await resolver.Resolve(s.Request);
                         if (s.Response.AnswerRecords.Count > 0)
                         {
-                            var newAnswerRecords = new List<IResourceRecord>();
-
                             foreach (var response in s.Response.AnswerRecords)
                             {
                                 switch (response)
                                 {
                                     case IPAddressResourceRecord ipAddressRecord:
-                                        newAnswerRecords.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
+                                        updatedMasterFile.Add(new IPAddressResourceRecord(s.Request.Questions[0].Name, ipAddressRecord.IPAddress, ipAddressRecord.TimeToLive));
                                         break;
                                     case CanonicalNameResourceRecord cnameRecord:
-                                        newAnswerRecords.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
+                                        updatedMasterFile.Add(new CanonicalNameResourceRecord(s.Request.Questions[0].Name, cnameRecord.CanonicalDomainName, cnameRecord.TimeToLive));
                                         break;
                                     case MailExchangeResourceRecord mxRecord:
-                                        masterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
+                                        updatedMasterFile.AddMailExchangeResourceRecord(s.Request.Questions[0].Name.ToString(), mxRecord.Preference, mxRecord.ExchangeDomainName.ToString());
                                         break;
                                     case NameServerResourceRecord nsRecord:
-                                        newAnswerRecords.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
+                                        updatedMasterFile.Add(new NameServerResourceRecord(s.Request.Questions[0].Name, nsRecord.NSDomainName, nsRecord.TimeToLive));
                                         break;
                                     case TextResourceRecord txtRecord:
-                                        newAnswerRecords.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
+                                        updatedMasterFile.Add(new TextResourceRecord(s.Request.Questions[0].Name, txtRecord.Attribute.Value, txtRecord.TextData.ToString(), txtRecord.TimeToLive));
                                         break;
                                 }
                                 AddServerLogItemAsync($"Response: {response}");
                                 Logger.Log($"Response: {response}");
                             }
 
-                            foreach (var newRecord in newAnswerRecords)
-                            {
-                                s.Response.AnswerRecords.Add(newRecord);
-                            }
-                            masterFile.AddToCache(domain, type, s.Response.AnswerRecords); // Add to cache
+                            updatedMasterFile.AddToCache(domain, type, s.Response.AnswerRecords); // Add to cache
                         }
                         else
                         {
@@ -490,6 +490,10 @@ namespace DNS_Simulation
                         }
                     }
                 }
+
+                // Replace the original master file with the updated master file
+                masterFile = updatedMasterFile;
+
                 await SaveEntriesToDatabaseAsync(masterFile);
                 UpdateRecordGridViewFromDatabase();
             }
