@@ -99,7 +99,7 @@ namespace DNS_Simulation
 
             for (int i = 0; i < numOfClients; i++)
             {
-                if (isLan)
+                if (isLan && numOfServers == 0)
                 {
                     LanIPAsk lanIpAsk = new();
                     lanIpAsk.ShowDialog();
